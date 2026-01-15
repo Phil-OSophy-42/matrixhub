@@ -116,7 +116,7 @@ export default function Home(): React.ReactElement {
   const [terminalLines, setTerminalLines] = useState<number[]>([]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText("docker run -d -p 80:80 matrixhub/server");
+    navigator.clipboard.writeText("curl -fsSL https://bit.ly/4qqSZIG | docker compose -f - up -d");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -163,13 +163,12 @@ export default function Home(): React.ReactElement {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 animate-glow inline-block">Hub</span> for AI Models
                 </h1>
                 <p className="text-base sm:text-lg text-slate-400 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                  World-class, self-hosted model repository designed for <strong className="text-white">vLLM</strong> and <strong className="text-white">SGLang</strong>.
-                  Secure your AI assets with RBAC, accelerate distribution with proxy caching, and manage TB-scale models effortlessly.
+                  MatrixHub is an open-source, self-hosted AI model registry engineered for large-scale enterprise inference. It serves as a drop-in private replacement for <span className="text-white">Hugging Face</span>, purpose-built to accelerate <span className="text-white">vLLM</span> and <span className="text-white">SGLang</span> workloads.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                   <a
-                    href="https://github.com/matrixhub-ai/matrixhub"
+                    href="/docs/getting-started/quickstart"
                     className="px-6 sm:px-8 py-3 sm:py-4 bg-green-600 hover:bg-green-500 text-black rounded-lg font-bold text-base sm:text-lg transition-all shadow-[0_0_20px_rgba(22,163,74,0.4)] hover:shadow-[0_0_30px_rgba(22,163,74,0.6)] flex items-center justify-center gap-2 hover:text-black hover:no-underline hover:scale-105 transform"
                   >
                     Quick Start <ArrowRight size={20} />
@@ -274,26 +273,26 @@ export default function Home(): React.ReactElement {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <FeatureCard
                 icon={<Network size={24} />}
-                title="HF Transparent Proxy"
-                desc="Drop-in replacement. Point your HF_ENDPOINT to MatrixHub and keep your existing training/inference code unchanged."
+                title="Transparent HF Proxy"
+                desc="Drop-in replacement for Hugging Face. Point your HF_ENDPOINT to MatrixHub and keep all training/inference code unchanged."
                 index={0}
               />
               <FeatureCard
                 icon={<Zap size={24} />}
-                title="Intranet Cache"
-                desc="Pull once, cache forever. Drastically reduce bandwidth costs and accelerate cluster-wide model distribution."
+                title="On-Demand Caching"
+                desc="Pull once, cache forever. Automatically localizes public models to slash redundant traffic and accelerate cluster-wide distribution."
                 index={1}
               />
               <FeatureCard
                 icon={<Shield size={24} />}
-                title="Enterprise RBAC"
-                desc="Fine-grained permissions, audit logs, and multi-tenant isolation for security-conscious organizations."
+                title="RBAC & Audit Logs"
+                desc="Fine-grained permissions, project-based isolation, and comprehensive audit trails for every upload and download."
                 index={2}
               />
               <FeatureCard
                 icon={<Database size={24} />}
-                title="TB-Scale Transfer"
-                desc="Optimized for massive files with resumable uploads, chunking, and P2P capabilities for stability."
+                title="Storage Agnostic"
+                desc="Compatible with local filesystems, NFS, and S3-compatible backends (MinIO, AWS). Scale to unlimited model capacity."
                 index={3}
               />
             </div>
@@ -316,26 +315,26 @@ export default function Home(): React.ReactElement {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               <UseCaseCard
                 icon={<Rocket size={20} />}
-                title="High-Speed Cluster Distribution"
-                desc="When deploying a 70B model to 100 GPUs, MatrixHub acts as a local pull-through cache, preventing internet bottleneck."
+                title="Zero-Wait Distribution"
+                desc="Eliminate bandwidth bottlenecks with a 'Pull-once, serve-all' cache. Achieve 10Gbps+ speeds across 100+ GPU nodes simultaneously."
                 index={0}
               />
               <UseCaseCard
                 icon={<ShieldCheck size={20} />}
-                title="Air-Gapped Environments"
-                desc="Securely ferry models from public internet to isolated high-security networks with strict audit trails and scanning."
+                title="Air-Gapped Delivery"
+                desc="Securely ferry models into isolated networks with integrity protection, malware scanning, and comprehensive audit trails."
                 index={1}
               />
               <UseCaseCard
                 icon={<Tags size={20} />}
-                title="Asset & Version Management"
-                desc="Centralize your fine-tuned checkpoints (LoRA/Full) with immutable version tags, treating models as production artifacts."
+                title="Private Registry"
+                desc="Centralize fine-tuned weights with tag locking and CI/CD integration. Guarantee consistency from development to production."
                 index={2}
               />
               <UseCaseCard
                 icon={<Globe size={20} />}
-                title="Cross-Region Sync"
-                desc="Automatically synchronize model registries across different geographic data centers for low-latency inference."
+                title="Global Multi-Region Sync"
+                desc="Automate asynchronous, resumable replication between data centers for high availability and low-latency local access."
                 index={3}
               />
             </div>
@@ -352,7 +351,6 @@ export default function Home(): React.ReactElement {
               <TechLogo logo={<img src="/img/integrations/vllm.png" alt="vLLM" className="w-12 h-12 sm:w-16 sm:h-16 rounded-full" />} name="vLLM" index={0} />
               <TechLogo logo={<img src="/img/integrations/sglang.png" alt="SGLang" className="w-12 h-12 sm:w-16 sm:h-16 rounded-full" />} name="SGLang" index={1} />
               <TechLogo logo={<img src="/img/integrations/kubernetes.png" alt="Kubernetes" className="w-12 h-12 sm:w-16 sm:h-16" />} name="Kubernetes" index={2} />
-              <TechLogo logo={<img src="/img/integrations/minio.png" alt="MinIO" className="w-12 h-12 sm:w-16 sm:h-16" />} name="MinIO" index={3} />
             </div>
           </div>
         </section>
@@ -370,14 +368,14 @@ export default function Home(): React.ReactElement {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
                <a
-                 href="https://github.com/matrixhub-ai/matrixhub"
+                 href="/docs/intro"
                  className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-black hover:bg-slate-200 rounded-lg font-bold text-base sm:text-lg transition-all hover:text-black hover:no-underline hover:scale-105 transform"
                >
                   Read the Docs
                </a>
                <div className="flex items-center bg-[#0d1117] border border-slate-700 rounded-lg p-1 pr-2 sm:pr-4 hover:border-slate-600 transition-colors">
                  <div className="px-3 sm:px-4 py-2 sm:py-3 text-slate-400 font-mono text-xs sm:text-sm truncate max-w-[200px] sm:max-w-none">
-                   docker compose up -d matrixhub-ai/matrixhub
+                   curl -fsSL https://bit.ly/4qqSZIG | docker compose -f - up -d
                  </div>
                  <button
                   onClick={handleCopy}

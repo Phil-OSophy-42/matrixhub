@@ -29,7 +29,10 @@ const config: Config = {
     [
       'classic',
       {
-        docs: false,
+        docs: {
+          path: './docs',
+          routeBasePath: 'docs',
+        },
         blog: false,
         theme: {
           customCss: './src/css/custom.css',
@@ -55,13 +58,8 @@ const config: Config = {
       hideOnScroll: false,
       items: [
         {
-          href: '/#features',
-          label: 'Features',
-          position: 'left',
-        },
-        {
-          href: '/#use-cases',
-          label: 'Use Cases',
+          to: 'docs/intro',
+          label: 'Documentation',
           position: 'left',
         },
         {
@@ -84,8 +82,6 @@ const config: Config = {
         {
           title: 'Product',
           items: [
-            { label: 'Features', href: '/#features' },
-            { label: 'Use Cases', href: '/#use-cases' },
             { label: 'Integrations', href: '#' },
             { label: 'Roadmap', href: '#' },
           ],
