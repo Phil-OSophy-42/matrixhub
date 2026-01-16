@@ -31,6 +31,18 @@ MatrixHub streamlines the transition from public model hubs to production-grade 
 * **Reliable Replication**: Policy-driven, chunked transfers ensure data consistency even over unstable global networks.
 * **Cloud-Native Design**: Optimized for Kubernetes with official **Helm charts** and horizontal scaling capabilities.
 
+## 🚀 Quick Start
+
+### Docker Deployment
+
+Deploy MatrixHub with Docker Compose:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/matrixhub-ai/matrixhub/main/deploy/docker-compose.yml | docker compose -f - up -d
+```
+
+Access MatrixHub at `http://localhost:9527`.
+
 ## Community, discussion, contribution, and support
 
 Slack is our primary channel for community discussion, contribution coordination, and support. You can reach the maintainers and community at:

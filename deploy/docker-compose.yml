@@ -1,0 +1,7 @@
+services:
+  matrixhub:
+    image: ghcr.io/matrixhub-ai/matrixhub:${TAG:-main}
+    ports:
+      - "9527:9527"
+    volumes:
+      - ./data/:/data/

@@ -14,12 +14,12 @@ import (
 )
 
 var (
-	addr    = ":8080"
+	addr    = ":9527"
 	dataDir = "./data"
 )
 
 func init() {
-	flag.StringVar(&addr, "addr", ":8080", "HTTP server address")
+	flag.StringVar(&addr, "addr", ":9527", "HTTP server address")
 	flag.StringVar(&dataDir, "data", "./data", "Directory containing git repositories")
 	flag.Parse()
 }

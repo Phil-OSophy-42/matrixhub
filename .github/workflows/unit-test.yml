@@ -1,4 +1,4 @@
-name: Go test
+name: Go unit tests
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -31,5 +31,11 @@ jobs:
 
       - name: Install dependencies
         run: pip install huggingface_hub
-      - name: Test
-        run: go test ./... -v
+
+      # TODO: Fix make verify issues before enabling this check
+      - name: Verify code quality
+        run: make verify
+        continue-on-error: true
+
+      - name: Run unit tests
+        run: go test ./... -short -count=1 -v

@@ -7,15 +7,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:9527',
         changeOrigin: true,
       },
       '/objects': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:9527',
         changeOrigin: true,
       },
       '^/.*\\.git.*$': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:9527',
         changeOrigin: true,
       },
     },
