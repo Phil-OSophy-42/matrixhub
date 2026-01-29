@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v1alpha1/projects": {
+    "/api/v1alpha1/projects": {
       "post": {
         "operationId": "Projects_CreateProject",
         "responses": {
@@ -48,7 +48,7 @@
         ]
       }
     },
-    "/v1alpha1/projects/{name}": {
+    "/api/v1alpha1/projects/{name}": {
       "get": {
         "operationId": "Projects_GetProject",
         "responses": {
