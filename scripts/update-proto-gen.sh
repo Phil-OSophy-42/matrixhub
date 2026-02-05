@@ -79,21 +79,17 @@ rm -rf "${GO_DIR}" "${SWAGGER_DIR}" "${TS_DIR}"
 mkdir -p "${GO_DIR}" "${SWAGGER_DIR}" "${TS_DIR}"
 
 for version in ${VERSIONS[@]}; do
-  for proto in "${PROTO_DIR}/${version}"/*.proto; do
-
-    protoc \
-      "${proto}" \
-      --proto_path=".:${PROTOVENDOR_DIR}" \
-      --proto_path=".:${PROTO_DIR}" \
-      --go_out="${GO_DIR}" \
-      --go_opt=paths=source_relative \
-      --go-grpc_out="${GO_DIR}" \
-      --go-grpc_opt=paths=source_relative,require_unimplemented_servers=false \
-      --grpc-gateway_out="${GO_DIR}" \
-      --grpc-gateway_opt=paths=source_relative \
-      --validate_out="lang=go:${GO_DIR}" \
-      --validate_opt=paths=source_relative \
-      --openapiv2_out="${SWAGGER_DIR}" \
-      --grpc-gateway-ts_out="${TS_DIR}"
-  done
+  protoc "${PROTO_DIR}/${version}"/*.proto \
+    --proto_path=".:${PROTOVENDOR_DIR}" \
+    --proto_path=".:${PROTO_DIR}" \
+    --go_out="${GO_DIR}" \
+    --go_opt=paths=source_relative \
+    --go-grpc_out="${GO_DIR}" \
+    --go-grpc_opt=paths=source_relative,require_unimplemented_servers=false \
+    --grpc-gateway_out="${GO_DIR}" \
+    --grpc-gateway_opt=paths=source_relative \
+    --validate_out="lang=go:${GO_DIR}" \
+    --validate_opt=paths=source_relative \
+    --openapiv2_out="${SWAGGER_DIR}" \
+    --grpc-gateway-ts_out="${TS_DIR}"
 done
