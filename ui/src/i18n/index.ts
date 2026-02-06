@@ -10,11 +10,13 @@ i18n
   .init({
     fallbackLng: 'en',
     supportedLngs: ['en', 'zh'],
-    interpolation: { escapeValue: false },
+    interpolation: {
+      escapeValue: false,
+    },
   })
 
-i18n.on('languageChanged', async (lng) => {
-  const bundles = await loadLocale(lng)
+i18n.on('languageChanged', (lng) => {
+  const bundles = loadLocale(lng)
 
   let resourceBundle: Record<string, unknown> = {}
 
