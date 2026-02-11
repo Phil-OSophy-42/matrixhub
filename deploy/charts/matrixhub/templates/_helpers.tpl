@@ -139,7 +139,7 @@ Database DSN
 {{- if .Values.apiserver.database.dsn }}
 {{- .Values.apiserver.database.dsn }}
 {{- else if eq .Values.apiserver.database.driver "mysql" }}
-{{- printf "matrixhub:%s@tcp(%s-mysql:3306)/matrixhub?charset=utf8mb4&parseTime=true" .Values.mysql.rootPassword (include "matrixhub.fullname" .) }}
+{{- printf "matrixhub:%s@tcp(%s-mysql:3306)/matrixhub?charset=utf8mb4&multiStatements=true&parseTime=true" .Values.mysql.rootPassword (include "matrixhub.fullname" .) }}
 {{- else if eq .Values.apiserver.database.driver "postgres" }}
 {{- printf "user=matrixhub password=%s host=%s-mysql port=5432 dbname=matrixhub sslmode=disable" .Values.mysql.rootPassword (include "matrixhub.fullname" .) }}
 {{- end }}
