@@ -36,7 +36,7 @@ apiserver:
   # -- service configuration
   service:
     # -- service type
-    type: NodePort
+    type: ClusterIP
     # -- service port
     port: 9527
     # -- node port

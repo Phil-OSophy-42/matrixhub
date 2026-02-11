@@ -22,6 +22,7 @@ PLATFORMS ?=
 IMAGE_BUILD_CMD ?= docker buildx build
 
 IMAGE_REPO := ghcr.io/matrixhub-ai/matrixhub
+VERSION ?= $(GIT_TAG)
 
 BASE_IMAGE_PREFIX ?= docker.io
 NPM_CONFIG_REGISTRY ?= https://registry.npmjs.org
@@ -90,6 +91,22 @@ image-build: ## Build the MatrixHub image
 		$(IMAGE_BUILD_EXTRA_OPTS) \
 		.
 
+.PHONY: image-build-apiserver
+image-build-apiserver: ## Build the MatrixHub apiserver image
+	$(IMAGE_BUILD_CMD) \
+		-t $(IMAGE_REPO):$(VERSION) \
+		-f deploy/docker/matrixhub/Dockerfile \
+		$(if $(PLATFORMS),--platform=$(PLATFORMS)) \
+		--build-arg GOPROXY=$(GOPROXY) \
+		--build-arg BASE_IMAGE_PREFIX=$(BASE_IMAGE_PREFIX) \
+		$(PUSH) \
+		$(IMAGE_BUILD_EXTRA_OPTS) \
+		.
+
+.PHONY: image-push-apiserver
+image-push-apiserver: ## Build and push the MatrixHub apiserver image
+	$(MAKE) image-build-apiserver PUSH=--push
+
 .PHONY: image-push
 image-push: PUSH=--push
 image-push: image-build
@@ -106,3 +123,50 @@ clean: ## Clean all build artifacts
 	rm -rf bin
 	make -C web clean
 	make -C website clean
+
+##@ E2E Testing
+
+.PHONY: deploy.kind-cluster
+deploy.kind-cluster: ## Setup KIND cluster
+	./scripts/setup-kind-cluster.sh
+
+.PHONY: deploy.matrixhub
+deploy.matrixhub: ## Deploy MatrixHub to KIND cluster
+	./scripts/deploy-matrixhub.sh
+
+.PHONY: kind.setup
+kind.setup: deploy.kind-cluster deploy.matrixhub ## Setup KIND cluster and deploy MatrixHub
+
+.PHONY: test.e2e
+test.e2e: ## Run E2E tests locally (requires running MatrixHub)
+	$(eval level ?= "smoke")
+	@bash ./scripts/run-test.sh $(level) smoke $(MATRIXHUB_BASE_URL)
+
+.PHONY: test.e2e.kind
+test.e2e.kind: ## Run E2E tests in KIND cluster (setup, deploy, test)
+	@echo "================================================"
+	@echo "MatrixHub Kind E2E Test Workflow"
+	@echo "================================================"
+	@echo ""
+	@echo "Environment variables:"
+	@echo "  E2E_CLUSTER_NAME    = $${E2E_CLUSTER_NAME:-matrixhub-e2e}"
+	@echo "  E2E_KIND_IMAGE_TAG  = $${E2E_KIND_IMAGE_TAG:-v1.32.3}"
+	@echo "  E2E_MATRIXHUB_IMAGE = $${E2E_MATRIXHUB_IMAGE:-ghcr.io/matrixhub-ai/matrixhub:latest}"
+	@echo ""
+	@echo "Step 1: Setting up KIND cluster and deploying MatrixHub..."
+	$(MAKE) kind.setup
+	@echo ""
+	@echo "Step 2: Running E2E tests..."
+	MATRIXHUB_BASE_URL="http://localhost:30001" $(MAKE) test.e2e
+	@echo ""
+	@echo "To cleanup, run:"
+	@echo "  kind delete cluster --name=$${E2E_CLUSTER_NAME:-matrixhub-e2e}"
+	@echo ""
+
+.PHONY: chart.build
+chart.build: ## Build Helm chart package
+	helm package ./deploy/charts/matrixhub -d ./deploy/charts
+
+.PHONY: chart.lint
+chart.lint: ## Lint Helm chart
+	helm lint ./deploy/charts/matrixhub
