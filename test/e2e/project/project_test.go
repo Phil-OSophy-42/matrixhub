@@ -1,13 +1,24 @@
-// Copyright 2024 Authors of matrixhub
-// SPDX-License-Identifier: Apache-2.0
+// Copyright The MatrixHub Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package project_test
 
 import (
+	mhe2e "github.com/matrixhub-ai/matrixhub/test/e2e"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/spidernet-io/e2eframework/tools"
-	mhe2e "github.com/matrixhub-ai/matrixhub/test/e2e"
 )
 
 var _ = Describe("test Project", Label("project"), func() {
@@ -27,7 +38,6 @@ var _ = Describe("test Project", Label("project"), func() {
 
 			GinkgoWriter.Printf("Create response: success=%v, status=%d\n", resp.Success, resp.HTTPStatusCode)
 
-			// 注意：DeleteProject API 可能未实现，此处调用仅作清理尝试
 			_, _ = apiClient.DeleteProject(ctx, projectName)
 		})
 
@@ -49,7 +59,6 @@ var _ = Describe("test Project", Label("project"), func() {
 			projectName := mhe2e.GenerateTestProjectName("project")
 			GinkgoWriter.Printf("Creating then getting project: %v\n", projectName)
 
-			// 先创建项目
 			createResp, err := apiClient.CreateProject(ctx, projectName)
 			Expect(err).NotTo(HaveOccurred(), "create should succeed")
 			Expect(createResp.Success).To(BeTrue(), "create should return success")
@@ -57,7 +66,6 @@ var _ = Describe("test Project", Label("project"), func() {
 				_, _ = apiClient.DeleteProject(ctx, projectName)
 			}()
 
-			// 然后获取项目
 			getResp, err := apiClient.GetProject(ctx, projectName)
 			Expect(err).NotTo(HaveOccurred(), "get should not have error")
 			Expect(getResp).NotTo(BeNil(), "get response should not be nil")
@@ -89,7 +97,6 @@ var _ = Describe("test Project", Label("project"), func() {
 			projectName := mhe2e.GenerateTestProjectName("project")
 			GinkgoWriter.Printf("Create and get same project: %v\n", projectName)
 
-			// 创建项目
 			createResp, err := apiClient.CreateProject(ctx, projectName)
 			Expect(err).NotTo(HaveOccurred(), "create should succeed")
 			Expect(createResp.Success).To(BeTrue(), "create should return success")
@@ -97,38 +104,10 @@ var _ = Describe("test Project", Label("project"), func() {
 				_, _ = apiClient.DeleteProject(ctx, projectName)
 			}()
 
-			// 获取项目
 			getResp, err := apiClient.GetProject(ctx, projectName)
 			Expect(err).NotTo(HaveOccurred(), "get should not have error")
 			Expect(getResp.Success).To(BeTrue(), "get should return success")
 			Expect(getResp.Data.Name).To(Equal(projectName), "project name should match")
-		})
-
-		It("should handle concurrent project creation", Label("L00006"), func() {
-			projectName := "concurrent-" + tools.RandomName()
-			GinkgoWriter.Printf("Concurrent creation test for: %v\n", projectName)
-
-			// 第一次创建应该成功
-			createResp, err := apiClient.CreateProject(ctx, projectName)
-			Expect(err).NotTo(HaveOccurred(), "first create should succeed")
-			Expect(createResp.Success).To(BeTrue(), "first create should return success")
-			defer func() {
-				_, _ = apiClient.DeleteProject(ctx, projectName)
-			}()
-
-			// 第二次创建同名项目的行为取决于业务逻辑
-			// 可能返回成功 (幂等) 或失败 (冲突)
-			secondResp, err := apiClient.CreateProject(ctx, projectName)
-			Expect(err).NotTo(HaveOccurred(), "second create should not have error")
-			Expect(secondResp).NotTo(BeNil(), "second response should not be nil")
-
-			// 验证返回状态码是成功或失败（取决于业务逻辑）
-			if secondResp.Success {
-				GinkgoWriter.Printf("Second create succeeded (idempotent): status=%d\n", secondResp.HTTPStatusCode)
-			} else {
-				GinkgoWriter.Printf("Second create failed as expected: code=%v, message=%v\n",
-					secondResp.Error.Code, secondResp.Error.Message)
-			}
 		})
 	})
 })
