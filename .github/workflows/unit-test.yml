@@ -47,4 +47,4 @@ jobs:
         continue-on-error: true
 
       - name: Run unit tests
-        run: go test ./... -short -count=1 -v
+        run: go test pkg/... internal/... -short -count=1 -v

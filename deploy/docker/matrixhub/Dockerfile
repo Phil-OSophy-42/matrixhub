@@ -1,0 +1,53 @@
+ARG GO_VERSION=1.25
+ARG ALPINE_VERSION=3.23
+
+ARG BASE_IMAGE_PREFIX=docker.io
+ARG GOPROXY
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+
+ARG LD_FLAGS
+
+##########################################
+
+FROM --platform=$BUILDPLATFORM ${BASE_IMAGE_PREFIX}/library/golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+
+WORKDIR /workspace
+
+ARG GOPROXY
+ENV GOPROXY=${GOPROXY}
+ARG HTTP_PROXY
+ENV HTTP_PROXY=${HTTP_PROXY}
+ARG HTTPS_PROXY
+ENV HTTPS_PROXY=${HTTPS_PROXY}
+
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add gcc musl-dev
+
+COPY . .
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+ARG TARGETARCH
+ARG LD_FLAGS
+ENV LD_FLAGS=${LD_FLAGS}
+RUN --mount=type=cache,target=/go/pkg/mod \
+    CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH \
+    go build -ldflags="${LD_FLAGS}" -o /matrixhub ./cmd/matrixhub
+
+##########################################
+
+FROM ${BASE_IMAGE_PREFIX}/library/alpine:${ALPINE_VERSION} AS matrixhub
+
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add ca-certificates git && \
+    update-ca-certificates
+
+COPY --from=builder /matrixhub /usr/local/bin/matrixhub
+
+COPY db/migrations /etc/matrixhub/migrations
+
+EXPOSE 9527
+
+CMD ["/usr/local/bin/matrixhub", "apiserver"]

@@ -1,0 +1,121 @@
+apiserver:
+  # -- matrixhub-apiserver deployment labels
+  labels:
+    # -- matrixhub-apiserver deployment app name
+    app: matrixhub-apiserver
+  # -- target replicas
+  replicaCount: 1
+  # -- Add matrixhub apiserver pod annotations
+  podAnnotations: {}
+  # -- Add matrixhub apiserver pod labels
+  podLabels: {}
+
+  # -- image configuration
+  image:
+    # -- matrixhub image registry
+    registry: ghcr.io
+    repository: matrixhub-ai/matrixhub
+    # -- The image tag
+    tag: ""
+    # -- Pull policy of image
+    pullPolicy: IfNotPresent
+    # -- Pull secrets
+    pullSecrets: []
+
+  # -- Resource configuration
+  resources:
+    # -- resource limits
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    # -- resource requests
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+  # -- service configuration
+  service:
+    # -- service type
+    type: ClusterIP
+    # -- service port
+    port: 9527
+    # -- node port
+    nodePort: 30001
+    # -- service annotations
+    annotations: {}
+
+  # -- debug mode
+  debug: false
+  # -- log level
+  logLevel: "warn"
+
+  # -- database configuration
+  database:
+    # -- database driver (mysql/postgres)
+    driver: mysql
+    # -- database access type
+    accessType: readwrite
+    # -- max open connections
+    maxOpenConns: 100
+    # -- max idle connections
+    maxIdleConns: 10
+    # -- connection max lifetime seconds
+    connMaxLifetimeSeconds: 3600
+    # -- connection max idle seconds
+    connMaxIdleSeconds: 1800
+    # -- enable database migration
+    migrate: true
+    # -- migration path
+    migrationPath: /etc/matrixhub/migrations
+    # -- custom DSN for external database
+    dsn: ""
+
+  # -- api server port
+  port: 9527
+
+# -- mysql configuration (only when global.storage.apiserver.builtIn is true)
+mysql:
+  # -- mysql image registry
+  registry: docker.io
+  # -- mysql image repository
+  repository: library/mysql
+  # -- mysql image tag
+  tag: "5.7.39"
+  # -- mysql pull policy
+  pullPolicy: IfNotPresent
+  # -- mysql persistence configuration
+  persistence:
+    # -- persistence size
+    size: 8Gi
+    # -- storage class name
+    storageClass: ""
+  # -- mysql pull secrets
+  pullSecrets: []
+  # -- mysql root password
+  rootPassword: "password"
+
+# -- global configuration
+global:
+  # -- image pull secrets
+  imagePullSecrets: []
+  # -- image registry
+  imageRegistry: ""
+  # -- enable built-in storage
+  storage:
+    apiserver:
+      builtIn: true
+  # -- busybox image for init containers
+  busybox:
+    image:
+      repository: busybox
+      tag: "latest"
+      pullPolicy: IfNotPresent
+
+# -- node configuration
+nodeSelector: {}
+
+# -- tolerations
+tolerations: []
+
+# -- affinity
+affinity: {}

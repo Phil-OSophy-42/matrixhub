@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS `projects`
     `updated_at`   timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `name` (`name`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4;
+) ENGINE = InnoDb DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `users` (
     `id` varchar(36) NOT NULL,
