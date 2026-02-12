@@ -40,6 +40,7 @@ func NewProjectHandler(repo project.IProjectRepository) *ProjectHandler {
 func (ph *ProjectHandler) RegisterToServer(opt *ServerOptions) {
 	// Register GRPC Handler
 	projectv1alpha1.RegisterProjectsServer(opt.GRPCServer, ph)
+
 	if err := projectv1alpha1.RegisterProjectsHandlerServer(context.Background(), opt.GatewayMux, ph); err != nil {
 		log.Errorf("register handler error: %s", err.Error())
 	}
