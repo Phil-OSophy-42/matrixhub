@@ -18,3 +18,5 @@ CREATE TABLE IF NOT EXISTS `users` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS users;
