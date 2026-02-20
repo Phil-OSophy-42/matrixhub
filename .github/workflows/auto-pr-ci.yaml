@@ -12,11 +12,6 @@ on:
       - opened
       - synchronize
       - reopened
-  pull_request_target:
-    types:
-      - opened
-      - synchronize
-      - reopened
   workflow_dispatch:
     inputs:
       ref:
@@ -39,7 +34,7 @@ jobs:
     steps:
       - name: Check Code Changes
         uses: dorny/paths-filter@v2.11.1
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
+        if: ${{ github.event_name == 'pull_request'}}
         id: filter_pr
         with:
           base: ${{ github.event.pull_request.base.sha }}
@@ -66,7 +61,7 @@ jobs:
             echo "RUN_E2E_ENABLED=true" >> $GITHUB_ENV
             echo "RUN_E2E_LABELS=${{ github.event.inputs.e2e_labels }}" >> $GITHUB_ENV
             echo "RUN_TAG=${{ github.event.inputs.ref }}" >> $GITHUB_ENV
-          elif ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }} ; then
+          elif ${{ github.event_name == 'pull_request'}} ; then
             echo "trigger by pull_request"
             echo "RUN_TAG=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
             if ${{ steps.filter_pr.outputs.all_e2e == 'true' }} ; then
@@ -76,8 +71,7 @@ jobs:
                 echo "RUN_E2E_LABEL=smoke" >> $GITHUB_ENV
             fi
             echo "RUN_E2E_ENABLED=${{ steps.filter_pr.outputs.run_e2e }}" >> $GITHUB_ENV
-            # do it in another workflow
-            echo "RUN_UNITTEST_ENABLED=false" >> $GITHUB_ENV
+            echo "RUN_UNITTEST_ENABLED=true" >> $GITHUB_ENV
           else
             echo "error, unknown event ${{ github.event_name }}"
             exit 1
