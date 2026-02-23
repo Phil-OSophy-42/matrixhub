@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 
 	"github.com/matrixhub-ai/matrixhub/internal/infra/config"
 	"github.com/matrixhub-ai/matrixhub/internal/infra/log"
@@ -29,16 +29,16 @@ var Version = "0.1.0"
 const configFlag = "config"
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "matrixhub"
-	app.Version = Version
-	app.Usage = "MATRIXBUB"
-	app.Commands = []*cli.Command{
-		runAPIServerCommand,
+	rootCmd := &cobra.Command{
+		Use:     "matrixhub",
+		Short:   "MATRIXBUB",
+		Version: Version,
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintf(os.Stderr, "matrixhub: %s", err)
+	rootCmd.AddCommand(apiserverCmd)
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "matrixhub: %s\n", err)
 		os.Exit(1)
 	}
 }

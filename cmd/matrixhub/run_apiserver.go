@@ -20,7 +20,7 @@ import (
 	"syscall"
 
 	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 
 	"github.com/matrixhub-ai/matrixhub/internal/apiserver"
 )
@@ -50,19 +50,15 @@ func runAPIServer(configPath string) error {
 	return nil
 }
 
-var runAPIServerCommand = &cli.Command{
-	Name:  "apiserver",
-	Usage: "run matrixhub api server",
+var apiserverCmd = &cobra.Command{
+	Use:   "apiserver",
+	Short: "run matrixhub api server",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		configPath, _ := cmd.Flags().GetString(configFlag)
+		return runAPIServer(configPath)
+	},
+}
 
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    configFlag,
-			Aliases: []string{"c"},
-			Value:   "/etc/matrixhub/config.yaml",
-			Usage:   "matrixhub config file path",
-		},
-	},
-	Action: func(c *cli.Context) error {
-		return runAPIServer(c.String(configFlag))
-	},
+func init() {
+	apiserverCmd.Flags().StringP(configFlag, "c", "/etc/matrixhub/config.yaml", "matrixhub config file path")
 }
