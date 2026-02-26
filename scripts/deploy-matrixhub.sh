@@ -79,7 +79,7 @@ echo "Loading images into KIND..."
 # MySQL image is public and can be pulled if not present
 IMAGES_TO_LOAD=(
     "${E2E_MATRIXHUB_IMAGE}"
-    "mysql:5.7.39"
+    "mysql:8.4"
     "busybox:latest"
 )
 

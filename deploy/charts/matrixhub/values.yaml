@@ -80,7 +80,7 @@ mysql:
   # -- mysql image repository
   repository: library/mysql
   # -- mysql image tag
-  tag: "5.7.39"
+  tag: "8.4"
   # -- mysql pull policy
   pullPolicy: IfNotPresent
   # -- mysql persistence configuration

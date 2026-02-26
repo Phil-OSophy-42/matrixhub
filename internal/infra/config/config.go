@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/viper"
 
@@ -43,10 +42,6 @@ func Init(configPath, sqlPath string) (*Config, error) {
 	v := viper.New()
 	v.SetConfigFile(configPath)
 
-	v.SetEnvPrefix("MATRIXHUB")
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	v.AutomaticEnv()
-
 	if err := v.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("failed to load config(%s): %w", configPath, err)
 	}
@@ -58,7 +53,6 @@ func Init(configPath, sqlPath string) (*Config, error) {
 	if err := v.Unmarshal(cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
-
 	if cfg.Database.DSN == "" {
 		log.Warn("failed to find matrixhub dsn from env or config")
 	}
@@ -71,7 +65,6 @@ func Init(configPath, sqlPath string) (*Config, error) {
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("config invalid: %v", err)
 	}
-
 	return cfg, nil
 }
 
