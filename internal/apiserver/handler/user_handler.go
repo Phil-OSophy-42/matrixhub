@@ -30,6 +30,14 @@ type UserHandler struct {
 	userRepo user.IUserRepo
 }
 
+func (u *UserHandler) GetCurrentUserProjectRoles(ctx context.Context, request *userv1alpha1.GetCurrentUserProjectRolesRequest) (*userv1alpha1.GetCurrentUserProjectRolesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
+func (u *UserHandler) UpdateUserRoles(ctx context.Context, request *userv1alpha1.UpdateUserRolesRequest) (*userv1alpha1.UpdateUserRolesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
 func (u *UserHandler) CreateUser(ctx context.Context, request *userv1alpha1.CreateUserRequest) (*userv1alpha1.CreateUserResponse, error) {
 	if err := request.ValidateAll(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -91,12 +99,11 @@ func (u *UserHandler) ListUsers(ctx context.Context, request *userv1alpha1.ListU
 	return &userv1alpha1.ListUsersResponse{
 		Users: result,
 		Pagination: &userv1alpha1.Pagination{
-			Total:    uint32(total),
+			Total:    int32(total),
 			Page:     request.Page,
 			PageSize: request.PageSize,
 		},
 	}, nil
-
 }
 
 func (u *UserHandler) RegisterToServer(options *ServerOptions) {

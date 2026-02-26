@@ -5,6 +5,7 @@
 */
 
 import * as fm from "../fetch.pb"
+import * as MatrixhubV1alpha1Utils from "./utils.pb"
 export type User = {
   id?: string
   username?: string
@@ -28,13 +29,7 @@ export type ListUsersRequest = {
 
 export type ListUsersResponse = {
   users?: User[]
-  pagination?: Pagination
-}
-
-export type Pagination = {
-  total?: number
-  page?: number
-  pageSize?: number
+  pagination?: MatrixhubV1alpha1Utils.Pagination
 }
 
 export type GetUserRequest = {
@@ -54,6 +49,22 @@ export type DeleteUserRequest = {
 export type DeleteUserResponse = {
 }
 
+export type UpdateUserRolesRequest = {
+  id?: string
+  addRoles?: number[]
+  removeRoles?: number[]
+}
+
+export type UpdateUserRolesResponse = {
+}
+
+export type GetCurrentUserProjectRolesRequest = {
+}
+
+export type GetCurrentUserProjectRolesResponse = {
+  projectRoles?: {[key: string]: string}
+}
+
 export class Users {
   static ListUsers(req: ListUsersRequest, initReq?: fm.InitReq): Promise<ListUsersResponse> {
     return fm.fetchReq<ListUsersRequest, ListUsersResponse>(`/api/v1alpha1/users?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
@@ -66,5 +77,11 @@ export class Users {
   }
   static DeleteUser(req: DeleteUserRequest, initReq?: fm.InitReq): Promise<DeleteUserResponse> {
     return fm.fetchReq<DeleteUserRequest, DeleteUserResponse>(`/api/v1alpha1/users/${req["id"]}`, {...initReq, method: "DELETE"})
+  }
+  static UpdateUserRoles(req: UpdateUserRolesRequest, initReq?: fm.InitReq): Promise<UpdateUserRolesResponse> {
+    return fm.fetchReq<UpdateUserRolesRequest, UpdateUserRolesResponse>(`/apis/v1alpha1/users/${req["id"]}/roles`, {...initReq, method: "PUT", body: JSON.stringify(req, fm.replacer)})
+  }
+  static GetCurrentUserProjectRoles(req: GetCurrentUserProjectRolesRequest, initReq?: fm.InitReq): Promise<GetCurrentUserProjectRolesResponse> {
+    return fm.fetchReq<GetCurrentUserProjectRolesRequest, GetCurrentUserProjectRolesResponse>(`/api/v1alpha1/users/projects/role?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
   }
 }

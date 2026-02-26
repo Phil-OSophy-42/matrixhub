@@ -5,20 +5,87 @@ package matrixhub.v1alpha1;
 option go_package = "github.com/matrixhub-ai/matrixhub/api/go/v1alpha1;v1alpha1";
 
 import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
+import "v1alpha1/role.proto";
+import "v1alpha1/utils.proto";
 
 service Projects {
-  rpc GetProject(GetProjectRequest) returns (GetProjectResponse) {
-    option (google.api.http) = {
-      get: "/api/v1alpha1/projects/{name}"
-    };
-  }
   rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse) {
     option (google.api.http) = {
       post: "/api/v1alpha1/projects"
       body: "*"
     };
   }
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1alpha1/projects"
+    };
+  }
+  rpc GetProject(GetProjectRequest) returns (GetProjectResponse) {
+    option (google.api.http) = {
+      get: "/api/v1alpha1/projects/{name}"
+    };
+  }
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse) {
+    option (google.api.http) = {
+      put: "/api/v1alpha1/projects/{id}"
+      body: "*"
+    };
+  }
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1alpha1/projects/{id}"
+    };
+  }
+  rpc ListProjectMembers(ListProjectMembersRequest) returns (ListProjectMembersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1alpha1/projects/{project_id}/members"
+    };
+  }
+  rpc AddProjectMemberWithRole(AddProjectMemberWithRoleRequest) returns (AddProjectMemberWithRoleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1alpha1/projects/{project_id}/member"
+      body: "*"
+    };
+  }
+  rpc RemoveProjectMember(RemoveProjectMemberRequest) returns (RemoveProjectMemberResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1alpha1/projects/{project_id}/members"
+    };
+  }
+  rpc UpdateProjectMemberRole(UpdateProjectMemberRoleRequest) returns (UpdateProjectMemberRoleResponse) {
+    option (google.api.http) = {
+      put: "/api/v1alpha1/projects/{project_id}/member/role"
+      body: "*"
+    };
+  }
+}
+
+message CreateProjectRequest {
+  string name = 1 [(validate.rules).string = {
+    min_len: 2,
+    pattern: "^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]{2}$"
+  }];
+  ProjectType type = 2;
+  google.protobuf.Int32Value registry_id = 3;
+}
+
+message CreateProjectResponse {
+  int32 project_id = 1;
+}
+
+message ListProjectsRequest {
+  string name = 1;
+  ProjectType type = 2;
+  uint32 page = 3;
+  uint32 page_size = 4;
+}
+
+message ListProjectsResponse {
+  repeated Project projects = 1;
+  Pagination pagination = 2;
 }
 
 message GetProjectRequest {
@@ -29,9 +96,87 @@ message GetProjectResponse {
   string name = 1;
 }
 
-message CreateProjectRequest {
-  string name = 1 [(validate.rules).string = {min_len: 1}];
+message DeleteProjectRequest {
+  int32 id = 1 [(validate.rules).int32.gt = 0];
 }
 
-message CreateProjectResponse {
+message DeleteProjectResponse {}
+
+message UpdateProjectRequest {
+  int32 id = 1 [(validate.rules).int32.gt = 0];
+  ProjectType type = 2;
 }
+
+message UpdateProjectResponse {
+}
+
+message Project {
+  int32 id = 1;
+  string name = 2;
+  ProjectType type = 3;
+  google.protobuf.Int32Value registry_id = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+enum ProjectType {
+  PROJECT_TYPE_UNSPECIFIED = 0;
+  PROJECT_TYPE_PRIVATE = 1;
+  PROJECT_TYPE_PUBLIC = 2;
+}
+
+message ListProjectMembersRequest {
+  int32 project_id = 1 [(validate.rules).int32.gt = 0];
+  string username = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message ListProjectMembersResponse {
+  repeated ProjectMember members = 1;
+  Pagination pagination = 2;
+}
+
+message ProjectMember {
+  string user_id = 1;
+  string username = 2;
+  MemberType member_type = 3;
+  RoleInfo role = 4;
+}
+
+enum MemberType {
+  MEMBER_TYPE_UNSPECIFIED = 0;
+  MEMBER_TYPE_USER = 1;
+  MEMBER_TYPE_GROUP = 2;
+}
+
+message AddProjectMemberWithRoleRequest {
+  int32 project_id = 1 [(validate.rules).int32.gt = 0];
+  MemberType member_type = 2 [(validate.rules).enum.defined_only = true];
+  string member_id = 3 [(validate.rules).string.min_len = 1];
+  int32 role_id = 4 [(validate.rules).int32.gt = 0];
+}
+
+message AddProjectMemberWithRoleResponse {}
+
+message RemoveProjectMemberRequest {
+  int32 project_id = 1 [(validate.rules).int32.gt = 0];
+  repeated MemberToRemove members = 2;
+}
+
+message MemberToRemove {
+  MemberType member_type = 1 [(validate.rules).enum.defined_only = true];
+  string member_id = 2 [(validate.rules).string.min_len = 1];
+}
+
+message RemoveProjectMemberResponse {}
+
+message UpdateProjectMemberRoleRequest {
+  int32 project_id = 1 [(validate.rules).int32.gt = 0];
+  MemberType member_type = 2 [(validate.rules).enum.defined_only = true];
+  string member_id = 3 [(validate.rules).string.min_len = 1];
+  int32 role_id = 4 [(validate.rules).int32.gt = 0];
+}
+
+message UpdateProjectMemberRoleResponse {}
+
+

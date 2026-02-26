@@ -6,6 +6,7 @@ option go_package = "github.com/matrixhub-ai/matrixhub/api/go/v1alpha1;v1alpha1"
 
 import "google/api/annotations.proto";
 import "validate/validate.proto";
+import "v1alpha1/utils.proto";
 
 service Users {
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
@@ -32,6 +33,19 @@ service Users {
       delete: "/api/v1alpha1/users/{id}"
     };
   }
+
+  rpc UpdateUserRoles(UpdateUserRolesRequest) returns (UpdateUserRolesResponse) {
+    option (google.api.http) = {
+      put: "/apis/v1alpha1/users/{id}/roles"
+      body: "*"
+    };
+  }
+
+  rpc GetCurrentUserProjectRoles(GetCurrentUserProjectRolesRequest) returns (GetCurrentUserProjectRolesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1alpha1/users/projects/role"
+    };
+  }
 }
 
 message User {
@@ -49,20 +63,14 @@ message CreateUserRequest {
 message CreateUserResponse {}
 
 message ListUsersRequest {
-  uint32 page = 1;
-  uint32 page_size = 2;
+  int32 page = 1;
+  int32 page_size = 2;
   string search = 3;
 }
 
 message ListUsersResponse {
   repeated User users = 1;
   Pagination pagination = 2;
-}
-
-message Pagination {
-  uint32 total = 1;
-  uint32 page = 2;
-  uint32 page_size = 3;
 }
 
 message GetUserRequest {
@@ -80,3 +88,18 @@ message DeleteUserRequest {
 }
 
 message DeleteUserResponse {}
+
+message UpdateUserRolesRequest {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  repeated int32 add_roles = 2;
+  repeated int32 remove_roles = 3;
+}
+
+message UpdateUserRolesResponse {
+}
+
+message GetCurrentUserProjectRolesRequest {}
+
+message GetCurrentUserProjectRolesResponse {
+  map<string, string> project_roles = 1;
+}

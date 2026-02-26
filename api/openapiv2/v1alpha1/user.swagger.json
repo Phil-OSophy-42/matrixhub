@@ -39,14 +39,14 @@
             "in": "query",
             "required": false,
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           {
             "name": "pageSize",
             "in": "query",
             "required": false,
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           {
             "name": "search",
@@ -85,6 +85,28 @@
             }
           }
         ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1alpha1/users/projects/role": {
+      "get": {
+        "operationId": "Users_GetCurrentUserProjectRoles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alpha1GetCurrentUserProjectRolesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
         "tags": [
           "Users"
         ]
@@ -147,9 +169,66 @@
           "Users"
         ]
       }
+    },
+    "/apis/v1alpha1/users/{id}/roles": {
+      "put": {
+        "operationId": "Users_UpdateUserRoles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alpha1UpdateUserRolesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UsersUpdateUserRolesBody"
+            }
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
     }
   },
   "definitions": {
+    "UsersUpdateUserRolesBody": {
+      "type": "object",
+      "properties": {
+        "addRoles": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "removeRoles": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -198,6 +277,17 @@
     "v1alpha1DeleteUserResponse": {
       "type": "object"
     },
+    "v1alpha1GetCurrentUserProjectRolesResponse": {
+      "type": "object",
+      "properties": {
+        "projectRoles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "v1alpha1GetUserResponse": {
       "type": "object",
       "properties": {
@@ -232,17 +322,29 @@
       "properties": {
         "total": {
           "type": "integer",
-          "format": "int64"
+          "format": "int32",
+          "description": "Total is the total number of referents."
         },
         "page": {
           "type": "integer",
-          "format": "int64"
+          "format": "int32",
+          "description": "Page is current page."
         },
         "pageSize": {
           "type": "integer",
-          "format": "int64"
+          "format": "int32",
+          "description": "PageSize is the data number shown per page."
+        },
+        "pages": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Pages is the number of pages."
         }
-      }
+      },
+      "description": "Pagination is for data paging."
+    },
+    "v1alpha1UpdateUserRolesResponse": {
+      "type": "object"
     },
     "v1alpha1User": {
       "type": "object",

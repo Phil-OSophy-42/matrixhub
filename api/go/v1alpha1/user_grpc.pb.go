@@ -19,10 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Users_ListUsers_FullMethodName  = "/matrixhub.v1alpha1.Users/ListUsers"
-	Users_CreateUser_FullMethodName = "/matrixhub.v1alpha1.Users/CreateUser"
-	Users_GetUser_FullMethodName    = "/matrixhub.v1alpha1.Users/GetUser"
-	Users_DeleteUser_FullMethodName = "/matrixhub.v1alpha1.Users/DeleteUser"
+	Users_ListUsers_FullMethodName                  = "/matrixhub.v1alpha1.Users/ListUsers"
+	Users_CreateUser_FullMethodName                 = "/matrixhub.v1alpha1.Users/CreateUser"
+	Users_GetUser_FullMethodName                    = "/matrixhub.v1alpha1.Users/GetUser"
+	Users_DeleteUser_FullMethodName                 = "/matrixhub.v1alpha1.Users/DeleteUser"
+	Users_UpdateUserRoles_FullMethodName            = "/matrixhub.v1alpha1.Users/UpdateUserRoles"
+	Users_GetCurrentUserProjectRoles_FullMethodName = "/matrixhub.v1alpha1.Users/GetCurrentUserProjectRoles"
 )
 
 // UsersClient is the client API for Users service.
@@ -33,6 +35,8 @@ type UsersClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
+	UpdateUserRoles(ctx context.Context, in *UpdateUserRolesRequest, opts ...grpc.CallOption) (*UpdateUserRolesResponse, error)
+	GetCurrentUserProjectRoles(ctx context.Context, in *GetCurrentUserProjectRolesRequest, opts ...grpc.CallOption) (*GetCurrentUserProjectRolesResponse, error)
 }
 
 type usersClient struct {
@@ -83,6 +87,26 @@ func (c *usersClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opt
 	return out, nil
 }
 
+func (c *usersClient) UpdateUserRoles(ctx context.Context, in *UpdateUserRolesRequest, opts ...grpc.CallOption) (*UpdateUserRolesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserRolesResponse)
+	err := c.cc.Invoke(ctx, Users_UpdateUserRoles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usersClient) GetCurrentUserProjectRoles(ctx context.Context, in *GetCurrentUserProjectRolesRequest, opts ...grpc.CallOption) (*GetCurrentUserProjectRolesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCurrentUserProjectRolesResponse)
+	err := c.cc.Invoke(ctx, Users_GetCurrentUserProjectRoles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServer is the server API for Users service.
 // All implementations should embed UnimplementedUsersServer
 // for forward compatibility.
@@ -91,6 +115,8 @@ type UsersServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
+	UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error)
+	GetCurrentUserProjectRoles(context.Context, *GetCurrentUserProjectRolesRequest) (*GetCurrentUserProjectRolesResponse, error)
 }
 
 // UnimplementedUsersServer should be embedded to have
@@ -111,6 +137,12 @@ func (UnimplementedUsersServer) GetUser(context.Context, *GetUserRequest) (*GetU
 }
 func (UnimplementedUsersServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedUsersServer) UpdateUserRoles(context.Context, *UpdateUserRolesRequest) (*UpdateUserRolesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateUserRoles not implemented")
+}
+func (UnimplementedUsersServer) GetCurrentUserProjectRoles(context.Context, *GetCurrentUserProjectRolesRequest) (*GetCurrentUserProjectRolesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCurrentUserProjectRoles not implemented")
 }
 func (UnimplementedUsersServer) testEmbeddedByValue() {}
 
@@ -204,6 +236,42 @@ func _Users_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Users_UpdateUserRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).UpdateUserRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_UpdateUserRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).UpdateUserRoles(ctx, req.(*UpdateUserRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Users_GetCurrentUserProjectRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCurrentUserProjectRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).GetCurrentUserProjectRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Users_GetCurrentUserProjectRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).GetCurrentUserProjectRoles(ctx, req.(*GetCurrentUserProjectRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -226,6 +294,14 @@ var Users_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteUser",
 			Handler:    _Users_DeleteUser_Handler,
+		},
+		{
+			MethodName: "UpdateUserRoles",
+			Handler:    _Users_UpdateUserRoles_Handler,
+		},
+		{
+			MethodName: "GetCurrentUserProjectRoles",
+			Handler:    _Users_GetCurrentUserProjectRoles_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

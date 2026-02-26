@@ -166,3 +166,7 @@ test.e2e.kind: ## Run E2E tests in KIND cluster (setup, deploy, test)
 .PHONY: chart.build
 chart.build: ## Build Helm chart package
 	helm package ./deploy/charts/matrixhub -d ./deploy/charts
+
+.PHONY: genproto
+genproto:
+	@./scripts/update-proto-gen.sh

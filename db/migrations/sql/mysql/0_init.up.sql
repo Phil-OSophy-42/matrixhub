@@ -1,9 +1,11 @@
 CREATE TABLE IF NOT EXISTS `projects`
 (
-    `id`           int         NOT NULL AUTO_INCREMENT,
-    `name`         varchar(64) DEFAULT "",
-    `created_at`   timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`   timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `id`           int          NOT NULL AUTO_INCREMENT,
+    `name`         varchar(64)  DEFAULT "",
+    `type`         tinyint      NOT NULL DEFAULT 0 ,
+    `registry_id`  int          DEFAULT NULL,
+    `created_at`   timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`   timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `name` (`name`)
 ) ENGINE = InnoDb DEFAULT CHARSET = utf8mb4;
@@ -21,19 +23,11 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 CREATE TABLE IF NOT EXISTS `roles`
 (
-    `id`          int         NOT NULL AUTO_INCREMENT,
-    `name`        varchar(64) NOT NULL,
-    `permissions` text        NOT NULL,
-    `scope`       varchar(64) NOT NULL,
-    `created_at`  timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`  timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
-
-CREATE TABLE IF NOT EXISTS `projects`
-(
     `id`           int         NOT NULL AUTO_INCREMENT,
-    `name`         varchar(64) DEFAULT "",
+    `name`         varchar(64) NOT NULL,
+    `display_name` varchar(64) NOT NULL,
+    `permissions`  text        NOT NULL,
+    `scope`        varchar(64) NOT NULL,
     `created_at`   timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`   timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

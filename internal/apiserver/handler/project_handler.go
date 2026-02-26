@@ -29,10 +29,37 @@ type ProjectHandler struct {
 	ProjectService project.IProjectService
 }
 
+func (ph *ProjectHandler) UpdateProject(ctx context.Context, request *projectv1alpha1.UpdateProjectRequest) (*projectv1alpha1.UpdateProjectResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
+func (ph *ProjectHandler) ListProjects(ctx context.Context, request *projectv1alpha1.ListProjectsRequest) (*projectv1alpha1.ListProjectsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
+func (ph *ProjectHandler) DeleteProject(ctx context.Context, request *projectv1alpha1.DeleteProjectRequest) (*projectv1alpha1.DeleteProjectResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
+func (ph *ProjectHandler) AddProjectMemberWithRole(ctx context.Context, request *projectv1alpha1.AddProjectMemberWithRoleRequest) (*projectv1alpha1.AddProjectMemberWithRoleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
+func (ph *ProjectHandler) RemoveProjectMember(ctx context.Context, request *projectv1alpha1.RemoveProjectMemberRequest) (*projectv1alpha1.RemoveProjectMemberResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
+func (ph *ProjectHandler) UpdateProjectMemberRole(ctx context.Context, request *projectv1alpha1.UpdateProjectMemberRoleRequest) (*projectv1alpha1.UpdateProjectMemberRoleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
+}
+
 func NewProjectHandler(ps project.IProjectService) *ProjectHandler {
 	return &ProjectHandler{
 		ProjectService: ps,
 	}
+}
+func (ph *ProjectHandler) ListProjectMembers(ctx context.Context, request *projectv1alpha1.ListProjectMembersRequest) (*projectv1alpha1.ListProjectMembersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "Not implemented")
 }
 
 func (ph *ProjectHandler) RegisterToServer(opt *ServerOptions) {
