@@ -21,20 +21,29 @@ ENV HTTP_PROXY=${HTTP_PROXY}
 ARG HTTPS_PROXY
 ENV HTTPS_PROXY=${HTTPS_PROXY}
 
+ARG TARGETARCH
 RUN --mount=type=cache,target=/var/cache/apk \
-    apk add gcc musl-dev
+    if [ "$TARGETARCH" = "arm64" ]; then \
+      apk add gcc-aarch64 musl-dev; \
+    else \
+      apk add gcc musl-dev; \
+    fi
 
 COPY . .
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     go mod download
 
-ARG TARGETARCH
 ARG LD_FLAGS
 ENV LD_FLAGS=${LD_FLAGS}
 RUN --mount=type=cache,target=/go/pkg/mod \
-    CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH \
-    go build -ldflags="${LD_FLAGS}" -o /matrixhub ./cmd/matrixhub
+    if [ "$TARGETARCH" = "arm64" ]; then \
+      CC=aarch64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH \
+      go build -ldflags="${LD_FLAGS}" -o /matrixhub ./cmd/matrixhub; \
+    else \
+      CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH \
+      go build -ldflags="${LD_FLAGS}" -o /matrixhub ./cmd/matrixhub; \
+    fi
 
 ##########################################
 
