@@ -1,0 +1,16 @@
+name: Build Image Latest
+
+on:
+  push:
+    branches:
+      - 'main'
+
+permissions: write-all
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/call-release-image.yaml
+    with:
+      ref: 'main'
+      tagoverride: 'latest'
+    secrets: inherit
