@@ -571,86 +571,6 @@ func (*UpdateUserRolesResponse) Descriptor() ([]byte, []int) {
 	return file_v1alpha1_user_proto_rawDescGZIP(), []int{10}
 }
 
-type GetCurrentUserProjectRolesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCurrentUserProjectRolesRequest) Reset() {
-	*x = GetCurrentUserProjectRolesRequest{}
-	mi := &file_v1alpha1_user_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCurrentUserProjectRolesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCurrentUserProjectRolesRequest) ProtoMessage() {}
-
-func (x *GetCurrentUserProjectRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1alpha1_user_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCurrentUserProjectRolesRequest.ProtoReflect.Descriptor instead.
-func (*GetCurrentUserProjectRolesRequest) Descriptor() ([]byte, []int) {
-	return file_v1alpha1_user_proto_rawDescGZIP(), []int{11}
-}
-
-type GetCurrentUserProjectRolesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProjectRoles  map[string]string      `protobuf:"bytes,1,rep,name=project_roles,json=projectRoles,proto3" json:"project_roles,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetCurrentUserProjectRolesResponse) Reset() {
-	*x = GetCurrentUserProjectRolesResponse{}
-	mi := &file_v1alpha1_user_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetCurrentUserProjectRolesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetCurrentUserProjectRolesResponse) ProtoMessage() {}
-
-func (x *GetCurrentUserProjectRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1alpha1_user_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetCurrentUserProjectRolesResponse.ProtoReflect.Descriptor instead.
-func (*GetCurrentUserProjectRolesResponse) Descriptor() ([]byte, []int) {
-	return file_v1alpha1_user_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *GetCurrentUserProjectRolesResponse) GetProjectRoles() map[string]string {
-	if x != nil {
-		return x.ProjectRoles
-	}
-	return nil
-}
-
 type ResetUserPasswordRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -661,7 +581,7 @@ type ResetUserPasswordRequest struct {
 
 func (x *ResetUserPasswordRequest) Reset() {
 	*x = ResetUserPasswordRequest{}
-	mi := &file_v1alpha1_user_proto_msgTypes[13]
+	mi := &file_v1alpha1_user_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -673,7 +593,7 @@ func (x *ResetUserPasswordRequest) String() string {
 func (*ResetUserPasswordRequest) ProtoMessage() {}
 
 func (x *ResetUserPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1alpha1_user_proto_msgTypes[13]
+	mi := &file_v1alpha1_user_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -686,7 +606,7 @@ func (x *ResetUserPasswordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetUserPasswordRequest.ProtoReflect.Descriptor instead.
 func (*ResetUserPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_v1alpha1_user_proto_rawDescGZIP(), []int{13}
+	return file_v1alpha1_user_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ResetUserPasswordRequest) GetId() string {
@@ -711,7 +631,7 @@ type ResetUserPasswordResponse struct {
 
 func (x *ResetUserPasswordResponse) Reset() {
 	*x = ResetUserPasswordResponse{}
-	mi := &file_v1alpha1_user_proto_msgTypes[14]
+	mi := &file_v1alpha1_user_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -723,7 +643,7 @@ func (x *ResetUserPasswordResponse) String() string {
 func (*ResetUserPasswordResponse) ProtoMessage() {}
 
 func (x *ResetUserPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1alpha1_user_proto_msgTypes[14]
+	mi := &file_v1alpha1_user_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -736,7 +656,7 @@ func (x *ResetUserPasswordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResetUserPasswordResponse.ProtoReflect.Descriptor instead.
 func (*ResetUserPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_v1alpha1_user_proto_rawDescGZIP(), []int{14}
+	return file_v1alpha1_user_proto_rawDescGZIP(), []int{12}
 }
 
 var File_v1alpha1_user_proto protoreflect.FileDescriptor
@@ -775,17 +695,11 @@ const file_v1alpha1_user_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x02id\x12\x1b\n" +
 	"\tadd_roles\x18\x02 \x03(\x05R\baddRoles\x12!\n" +
 	"\fremove_roles\x18\x03 \x03(\x05R\vremoveRoles\"\x19\n" +
-	"\x17UpdateUserRolesResponse\"#\n" +
-	"!GetCurrentUserProjectRolesRequest\"\xd4\x01\n" +
-	"\"GetCurrentUserProjectRolesResponse\x12m\n" +
-	"\rproject_roles\x18\x01 \x03(\v2H.matrixhub.v1alpha1.GetCurrentUserProjectRolesResponse.ProjectRolesEntryR\fprojectRoles\x1a?\n" +
-	"\x11ProjectRolesEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"X\n" +
+	"\x17UpdateUserRolesResponse\"X\n" +
 	"\x18ResetUserPasswordRequest\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x02id\x12#\n" +
 	"\bpassword\x18\x02 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\bpassword\"\x1b\n" +
-	"\x19ResetUserPasswordResponse2\xe9\a\n" +
+	"\x19ResetUserPasswordResponse2\xb0\x06\n" +
 	"\x05Users\x12u\n" +
 	"\tListUsers\x12$.matrixhub.v1alpha1.ListUsersRequest\x1a%.matrixhub.v1alpha1.ListUsersResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1alpha1/users\x12{\n" +
 	"\n" +
@@ -794,8 +708,7 @@ const file_v1alpha1_user_proto_rawDesc = "" +
 	"\n" +
 	"DeleteUser\x12%.matrixhub.v1alpha1.DeleteUserRequest\x1a&.matrixhub.v1alpha1.DeleteUserResponse\" \x82\xd3\xe4\x93\x02\x1a*\x18/api/v1alpha1/users/{id}\x12\xa4\x01\n" +
 	"\x11ResetUserPassword\x12,.matrixhub.v1alpha1.ResetUserPasswordRequest\x1a-.matrixhub.v1alpha1.ResetUserPasswordResponse\"2\x82\xd3\xe4\x93\x02,:\x01*\"'/api/v1alpha1/users/{id}/reset-password\x12\x96\x01\n" +
-	"\x0fUpdateUserRoles\x12*.matrixhub.v1alpha1.UpdateUserRolesRequest\x1a+.matrixhub.v1alpha1.UpdateUserRolesResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/apis/v1alpha1/users/{id}/roles\x12\xb6\x01\n" +
-	"\x1aGetCurrentUserProjectRoles\x125.matrixhub.v1alpha1.GetCurrentUserProjectRolesRequest\x1a6.matrixhub.v1alpha1.GetCurrentUserProjectRolesResponse\")\x82\xd3\xe4\x93\x02#\x12!/api/v1alpha1/users/projects/roleB<Z:github.com/matrixhub-ai/matrixhub/api/go/v1alpha1;v1alpha1b\x06proto3"
+	"\x0fUpdateUserRoles\x12*.matrixhub.v1alpha1.UpdateUserRolesRequest\x1a+.matrixhub.v1alpha1.UpdateUserRolesResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\x1a\x1f/apis/v1alpha1/users/{id}/rolesB<Z:github.com/matrixhub-ai/matrixhub/api/go/v1alpha1;v1alpha1b\x06proto3"
 
 var (
 	file_v1alpha1_user_proto_rawDescOnce sync.Once
@@ -809,49 +722,43 @@ func file_v1alpha1_user_proto_rawDescGZIP() []byte {
 	return file_v1alpha1_user_proto_rawDescData
 }
 
-var file_v1alpha1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_v1alpha1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_v1alpha1_user_proto_goTypes = []any{
-	(*User)(nil),                               // 0: matrixhub.v1alpha1.User
-	(*CreateUserRequest)(nil),                  // 1: matrixhub.v1alpha1.CreateUserRequest
-	(*CreateUserResponse)(nil),                 // 2: matrixhub.v1alpha1.CreateUserResponse
-	(*ListUsersRequest)(nil),                   // 3: matrixhub.v1alpha1.ListUsersRequest
-	(*ListUsersResponse)(nil),                  // 4: matrixhub.v1alpha1.ListUsersResponse
-	(*GetUserRequest)(nil),                     // 5: matrixhub.v1alpha1.GetUserRequest
-	(*GetUserResponse)(nil),                    // 6: matrixhub.v1alpha1.GetUserResponse
-	(*DeleteUserRequest)(nil),                  // 7: matrixhub.v1alpha1.DeleteUserRequest
-	(*DeleteUserResponse)(nil),                 // 8: matrixhub.v1alpha1.DeleteUserResponse
-	(*UpdateUserRolesRequest)(nil),             // 9: matrixhub.v1alpha1.UpdateUserRolesRequest
-	(*UpdateUserRolesResponse)(nil),            // 10: matrixhub.v1alpha1.UpdateUserRolesResponse
-	(*GetCurrentUserProjectRolesRequest)(nil),  // 11: matrixhub.v1alpha1.GetCurrentUserProjectRolesRequest
-	(*GetCurrentUserProjectRolesResponse)(nil), // 12: matrixhub.v1alpha1.GetCurrentUserProjectRolesResponse
-	(*ResetUserPasswordRequest)(nil),           // 13: matrixhub.v1alpha1.ResetUserPasswordRequest
-	(*ResetUserPasswordResponse)(nil),          // 14: matrixhub.v1alpha1.ResetUserPasswordResponse
-	nil,                                        // 15: matrixhub.v1alpha1.GetCurrentUserProjectRolesResponse.ProjectRolesEntry
-	(*Pagination)(nil),                         // 16: matrixhub.v1alpha1.Pagination
+	(*User)(nil),                      // 0: matrixhub.v1alpha1.User
+	(*CreateUserRequest)(nil),         // 1: matrixhub.v1alpha1.CreateUserRequest
+	(*CreateUserResponse)(nil),        // 2: matrixhub.v1alpha1.CreateUserResponse
+	(*ListUsersRequest)(nil),          // 3: matrixhub.v1alpha1.ListUsersRequest
+	(*ListUsersResponse)(nil),         // 4: matrixhub.v1alpha1.ListUsersResponse
+	(*GetUserRequest)(nil),            // 5: matrixhub.v1alpha1.GetUserRequest
+	(*GetUserResponse)(nil),           // 6: matrixhub.v1alpha1.GetUserResponse
+	(*DeleteUserRequest)(nil),         // 7: matrixhub.v1alpha1.DeleteUserRequest
+	(*DeleteUserResponse)(nil),        // 8: matrixhub.v1alpha1.DeleteUserResponse
+	(*UpdateUserRolesRequest)(nil),    // 9: matrixhub.v1alpha1.UpdateUserRolesRequest
+	(*UpdateUserRolesResponse)(nil),   // 10: matrixhub.v1alpha1.UpdateUserRolesResponse
+	(*ResetUserPasswordRequest)(nil),  // 11: matrixhub.v1alpha1.ResetUserPasswordRequest
+	(*ResetUserPasswordResponse)(nil), // 12: matrixhub.v1alpha1.ResetUserPasswordResponse
+	(*Pagination)(nil),                // 13: matrixhub.v1alpha1.Pagination
 }
 var file_v1alpha1_user_proto_depIdxs = []int32{
 	0,  // 0: matrixhub.v1alpha1.ListUsersResponse.users:type_name -> matrixhub.v1alpha1.User
-	16, // 1: matrixhub.v1alpha1.ListUsersResponse.pagination:type_name -> matrixhub.v1alpha1.Pagination
-	15, // 2: matrixhub.v1alpha1.GetCurrentUserProjectRolesResponse.project_roles:type_name -> matrixhub.v1alpha1.GetCurrentUserProjectRolesResponse.ProjectRolesEntry
-	3,  // 3: matrixhub.v1alpha1.Users.ListUsers:input_type -> matrixhub.v1alpha1.ListUsersRequest
-	1,  // 4: matrixhub.v1alpha1.Users.CreateUser:input_type -> matrixhub.v1alpha1.CreateUserRequest
-	5,  // 5: matrixhub.v1alpha1.Users.GetUser:input_type -> matrixhub.v1alpha1.GetUserRequest
-	7,  // 6: matrixhub.v1alpha1.Users.DeleteUser:input_type -> matrixhub.v1alpha1.DeleteUserRequest
-	13, // 7: matrixhub.v1alpha1.Users.ResetUserPassword:input_type -> matrixhub.v1alpha1.ResetUserPasswordRequest
-	9,  // 8: matrixhub.v1alpha1.Users.UpdateUserRoles:input_type -> matrixhub.v1alpha1.UpdateUserRolesRequest
-	11, // 9: matrixhub.v1alpha1.Users.GetCurrentUserProjectRoles:input_type -> matrixhub.v1alpha1.GetCurrentUserProjectRolesRequest
-	4,  // 10: matrixhub.v1alpha1.Users.ListUsers:output_type -> matrixhub.v1alpha1.ListUsersResponse
-	2,  // 11: matrixhub.v1alpha1.Users.CreateUser:output_type -> matrixhub.v1alpha1.CreateUserResponse
-	6,  // 12: matrixhub.v1alpha1.Users.GetUser:output_type -> matrixhub.v1alpha1.GetUserResponse
-	8,  // 13: matrixhub.v1alpha1.Users.DeleteUser:output_type -> matrixhub.v1alpha1.DeleteUserResponse
-	14, // 14: matrixhub.v1alpha1.Users.ResetUserPassword:output_type -> matrixhub.v1alpha1.ResetUserPasswordResponse
-	10, // 15: matrixhub.v1alpha1.Users.UpdateUserRoles:output_type -> matrixhub.v1alpha1.UpdateUserRolesResponse
-	12, // 16: matrixhub.v1alpha1.Users.GetCurrentUserProjectRoles:output_type -> matrixhub.v1alpha1.GetCurrentUserProjectRolesResponse
-	10, // [10:17] is the sub-list for method output_type
-	3,  // [3:10] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	13, // 1: matrixhub.v1alpha1.ListUsersResponse.pagination:type_name -> matrixhub.v1alpha1.Pagination
+	3,  // 2: matrixhub.v1alpha1.Users.ListUsers:input_type -> matrixhub.v1alpha1.ListUsersRequest
+	1,  // 3: matrixhub.v1alpha1.Users.CreateUser:input_type -> matrixhub.v1alpha1.CreateUserRequest
+	5,  // 4: matrixhub.v1alpha1.Users.GetUser:input_type -> matrixhub.v1alpha1.GetUserRequest
+	7,  // 5: matrixhub.v1alpha1.Users.DeleteUser:input_type -> matrixhub.v1alpha1.DeleteUserRequest
+	11, // 6: matrixhub.v1alpha1.Users.ResetUserPassword:input_type -> matrixhub.v1alpha1.ResetUserPasswordRequest
+	9,  // 7: matrixhub.v1alpha1.Users.UpdateUserRoles:input_type -> matrixhub.v1alpha1.UpdateUserRolesRequest
+	4,  // 8: matrixhub.v1alpha1.Users.ListUsers:output_type -> matrixhub.v1alpha1.ListUsersResponse
+	2,  // 9: matrixhub.v1alpha1.Users.CreateUser:output_type -> matrixhub.v1alpha1.CreateUserResponse
+	6,  // 10: matrixhub.v1alpha1.Users.GetUser:output_type -> matrixhub.v1alpha1.GetUserResponse
+	8,  // 11: matrixhub.v1alpha1.Users.DeleteUser:output_type -> matrixhub.v1alpha1.DeleteUserResponse
+	12, // 12: matrixhub.v1alpha1.Users.ResetUserPassword:output_type -> matrixhub.v1alpha1.ResetUserPasswordResponse
+	10, // 13: matrixhub.v1alpha1.Users.UpdateUserRoles:output_type -> matrixhub.v1alpha1.UpdateUserRolesResponse
+	8,  // [8:14] is the sub-list for method output_type
+	2,  // [2:8] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_v1alpha1_user_proto_init() }
@@ -866,7 +773,7 @@ func file_v1alpha1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1alpha1_user_proto_rawDesc), len(file_v1alpha1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

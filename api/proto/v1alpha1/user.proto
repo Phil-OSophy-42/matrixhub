@@ -47,12 +47,6 @@ service Users {
       body: "*"
     };
   }
-
-  rpc GetCurrentUserProjectRoles(GetCurrentUserProjectRolesRequest) returns (GetCurrentUserProjectRolesResponse) {
-    option (google.api.http) = {
-      get: "/api/v1alpha1/users/projects/role"
-    };
-  }
 }
 
 message User {
@@ -103,12 +97,6 @@ message UpdateUserRolesRequest {
 }
 
 message UpdateUserRolesResponse {
-}
-
-message GetCurrentUserProjectRolesRequest {}
-
-message GetCurrentUserProjectRolesResponse {
-  map<string, string> project_roles = 1;
 }
 
 message ResetUserPasswordRequest {

@@ -58,13 +58,6 @@ export type UpdateUserRolesRequest = {
 export type UpdateUserRolesResponse = {
 }
 
-export type GetCurrentUserProjectRolesRequest = {
-}
-
-export type GetCurrentUserProjectRolesResponse = {
-  projectRoles?: {[key: string]: string}
-}
-
 export type ResetUserPasswordRequest = {
   id?: string
   password?: string
@@ -91,8 +84,5 @@ export class Users {
   }
   static UpdateUserRoles(req: UpdateUserRolesRequest, initReq?: fm.InitReq): Promise<UpdateUserRolesResponse> {
     return fm.fetchReq<UpdateUserRolesRequest, UpdateUserRolesResponse>(`/apis/v1alpha1/users/${req["id"]}/roles`, {...initReq, method: "PUT", body: JSON.stringify(req, fm.replacer)})
-  }
-  static GetCurrentUserProjectRoles(req: GetCurrentUserProjectRolesRequest, initReq?: fm.InitReq): Promise<GetCurrentUserProjectRolesResponse> {
-    return fm.fetchReq<GetCurrentUserProjectRolesRequest, GetCurrentUserProjectRolesResponse>(`/api/v1alpha1/users/projects/role?${fm.renderURLSearchParams(req, [])}`, {...initReq, method: "GET"})
   }
 }

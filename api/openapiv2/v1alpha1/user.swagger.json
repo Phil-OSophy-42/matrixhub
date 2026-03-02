@@ -90,28 +90,6 @@
         ]
       }
     },
-    "/api/v1alpha1/users/projects/role": {
-      "get": {
-        "operationId": "Users_GetCurrentUserProjectRoles",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1alpha1GetCurrentUserProjectRolesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
     "/api/v1alpha1/users/{id}": {
       "get": {
         "operationId": "Users_GetUser",
@@ -326,17 +304,6 @@
     },
     "v1alpha1DeleteUserResponse": {
       "type": "object"
-    },
-    "v1alpha1GetCurrentUserProjectRolesResponse": {
-      "type": "object",
-      "properties": {
-        "projectRoles": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
     },
     "v1alpha1GetUserResponse": {
       "type": "object",

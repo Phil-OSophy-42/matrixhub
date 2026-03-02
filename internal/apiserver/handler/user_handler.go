@@ -35,10 +35,6 @@ func (u *UserHandler) ResetUserPassword(ctx context.Context, request *userv1alph
 	panic("implement me")
 }
 
-func (u *UserHandler) GetCurrentUserProjectRoles(ctx context.Context, request *userv1alpha1.GetCurrentUserProjectRolesRequest) (*userv1alpha1.GetCurrentUserProjectRolesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Not implemented")
-}
-
 func (u *UserHandler) UpdateUserRoles(ctx context.Context, request *userv1alpha1.UpdateUserRolesRequest) (*userv1alpha1.UpdateUserRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "Not implemented")
 }

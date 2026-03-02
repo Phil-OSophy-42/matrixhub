@@ -23,6 +23,7 @@ const (
 	CurrentUser_ListAccessTokens_FullMethodName  = "/matrixhub.v1alpha1.CurrentUser/ListAccessTokens"
 	CurrentUser_CreateAccessToken_FullMethodName = "/matrixhub.v1alpha1.CurrentUser/CreateAccessToken"
 	CurrentUser_DeleteAccessToken_FullMethodName = "/matrixhub.v1alpha1.CurrentUser/DeleteAccessToken"
+	CurrentUser_GetProjectRoles_FullMethodName   = "/matrixhub.v1alpha1.CurrentUser/GetProjectRoles"
 )
 
 // CurrentUserClient is the client API for CurrentUser service.
@@ -33,6 +34,7 @@ type CurrentUserClient interface {
 	ListAccessTokens(ctx context.Context, in *ListAccessTokensRequest, opts ...grpc.CallOption) (*ListAccessTokensResponse, error)
 	CreateAccessToken(ctx context.Context, in *CreateAccessTokenRequest, opts ...grpc.CallOption) (*CreateAccessTokenResponse, error)
 	DeleteAccessToken(ctx context.Context, in *DeleteAccessTokenRequest, opts ...grpc.CallOption) (*DeleteAccessTokenResponse, error)
+	GetProjectRoles(ctx context.Context, in *GetProjectRolesRequest, opts ...grpc.CallOption) (*GetProjectRolesResponse, error)
 }
 
 type currentUserClient struct {
@@ -83,6 +85,16 @@ func (c *currentUserClient) DeleteAccessToken(ctx context.Context, in *DeleteAcc
 	return out, nil
 }
 
+func (c *currentUserClient) GetProjectRoles(ctx context.Context, in *GetProjectRolesRequest, opts ...grpc.CallOption) (*GetProjectRolesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProjectRolesResponse)
+	err := c.cc.Invoke(ctx, CurrentUser_GetProjectRoles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CurrentUserServer is the server API for CurrentUser service.
 // All implementations should embed UnimplementedCurrentUserServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type CurrentUserServer interface {
 	ListAccessTokens(context.Context, *ListAccessTokensRequest) (*ListAccessTokensResponse, error)
 	CreateAccessToken(context.Context, *CreateAccessTokenRequest) (*CreateAccessTokenResponse, error)
 	DeleteAccessToken(context.Context, *DeleteAccessTokenRequest) (*DeleteAccessTokenResponse, error)
+	GetProjectRoles(context.Context, *GetProjectRolesRequest) (*GetProjectRolesResponse, error)
 }
 
 // UnimplementedCurrentUserServer should be embedded to have
@@ -111,6 +124,9 @@ func (UnimplementedCurrentUserServer) CreateAccessToken(context.Context, *Create
 }
 func (UnimplementedCurrentUserServer) DeleteAccessToken(context.Context, *DeleteAccessTokenRequest) (*DeleteAccessTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteAccessToken not implemented")
+}
+func (UnimplementedCurrentUserServer) GetProjectRoles(context.Context, *GetProjectRolesRequest) (*GetProjectRolesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetProjectRoles not implemented")
 }
 func (UnimplementedCurrentUserServer) testEmbeddedByValue() {}
 
@@ -204,6 +220,24 @@ func _CurrentUser_DeleteAccessToken_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CurrentUser_GetProjectRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CurrentUserServer).GetProjectRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CurrentUser_GetProjectRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CurrentUserServer).GetProjectRoles(ctx, req.(*GetProjectRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CurrentUser_ServiceDesc is the grpc.ServiceDesc for CurrentUser service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -226,6 +260,10 @@ var CurrentUser_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAccessToken",
 			Handler:    _CurrentUser_DeleteAccessToken_Handler,
+		},
+		{
+			MethodName: "GetProjectRoles",
+			Handler:    _CurrentUser_GetProjectRoles_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

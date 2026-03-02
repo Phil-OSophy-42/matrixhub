@@ -1040,3 +1040,209 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteAccessTokenResponseValidationError{}
+
+// Validate checks the field values on GetProjectRolesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetProjectRolesRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetProjectRolesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetProjectRolesRequestMultiError, or nil if none found.
+func (m *GetProjectRolesRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetProjectRolesRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetProjectRolesRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetProjectRolesRequestMultiError is an error wrapping multiple validation
+// errors returned by GetProjectRolesRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetProjectRolesRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetProjectRolesRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetProjectRolesRequestMultiError) AllErrors() []error { return m }
+
+// GetProjectRolesRequestValidationError is the validation error returned by
+// GetProjectRolesRequest.Validate if the designated constraints aren't met.
+type GetProjectRolesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetProjectRolesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetProjectRolesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetProjectRolesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetProjectRolesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetProjectRolesRequestValidationError) ErrorName() string {
+	return "GetProjectRolesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetProjectRolesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetProjectRolesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetProjectRolesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetProjectRolesRequestValidationError{}
+
+// Validate checks the field values on GetProjectRolesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetProjectRolesResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetProjectRolesResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetProjectRolesResponseMultiError, or nil if none found.
+func (m *GetProjectRolesResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetProjectRolesResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ProjectRoles
+
+	if len(errors) > 0 {
+		return GetProjectRolesResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetProjectRolesResponseMultiError is an error wrapping multiple validation
+// errors returned by GetProjectRolesResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetProjectRolesResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetProjectRolesResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetProjectRolesResponseMultiError) AllErrors() []error { return m }
+
+// GetProjectRolesResponseValidationError is the validation error returned by
+// GetProjectRolesResponse.Validate if the designated constraints aren't met.
+type GetProjectRolesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetProjectRolesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetProjectRolesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetProjectRolesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetProjectRolesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetProjectRolesResponseValidationError) ErrorName() string {
+	return "GetProjectRolesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetProjectRolesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetProjectRolesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetProjectRolesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetProjectRolesResponseValidationError{}

@@ -149,6 +149,27 @@ func local_request_CurrentUser_DeleteAccessToken_0(ctx context.Context, marshale
 	return msg, metadata, err
 }
 
+func request_CurrentUser_GetProjectRoles_0(ctx context.Context, marshaler runtime.Marshaler, client CurrentUserClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetProjectRolesRequest
+		metadata runtime.ServerMetadata
+	)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	msg, err := client.GetProjectRoles(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_CurrentUser_GetProjectRoles_0(ctx context.Context, marshaler runtime.Marshaler, server CurrentUserServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetProjectRolesRequest
+		metadata runtime.ServerMetadata
+	)
+	msg, err := server.GetProjectRoles(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 // RegisterCurrentUserHandlerServer registers the http handlers for service CurrentUser to "mux".
 // UnaryRPC     :call CurrentUserServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -234,6 +255,26 @@ func RegisterCurrentUserHandlerServer(ctx context.Context, mux *runtime.ServeMux
 			return
 		}
 		forward_CurrentUser_DeleteAccessToken_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_CurrentUser_GetProjectRoles_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/matrixhub.v1alpha1.CurrentUser/GetProjectRoles", runtime.WithHTTPPathPattern("/api/v1alpha1/users/projects/roles"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_CurrentUser_GetProjectRoles_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_CurrentUser_GetProjectRoles_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -343,6 +384,23 @@ func RegisterCurrentUserHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		}
 		forward_CurrentUser_DeleteAccessToken_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_CurrentUser_GetProjectRoles_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/matrixhub.v1alpha1.CurrentUser/GetProjectRoles", runtime.WithHTTPPathPattern("/api/v1alpha1/users/projects/roles"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_CurrentUser_GetProjectRoles_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_CurrentUser_GetProjectRoles_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
@@ -351,6 +409,7 @@ var (
 	pattern_CurrentUser_ListAccessTokens_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1alpha1", "current-user", "access-tokens"}, ""))
 	pattern_CurrentUser_CreateAccessToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"apis", "v1alpha1", "current-user", "access-tokens"}, ""))
 	pattern_CurrentUser_DeleteAccessToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"apis", "v1alpha1", "current-user", "access-tokens", "id"}, ""))
+	pattern_CurrentUser_GetProjectRoles_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1alpha1", "users", "projects", "roles"}, ""))
 )
 
 var (
@@ -358,4 +417,5 @@ var (
 	forward_CurrentUser_ListAccessTokens_0  = runtime.ForwardResponseMessage
 	forward_CurrentUser_CreateAccessToken_0 = runtime.ForwardResponseMessage
 	forward_CurrentUser_DeleteAccessToken_0 = runtime.ForwardResponseMessage
+	forward_CurrentUser_GetProjectRoles_0   = runtime.ForwardResponseMessage
 )

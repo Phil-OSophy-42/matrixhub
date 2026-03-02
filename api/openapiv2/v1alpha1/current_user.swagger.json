@@ -70,6 +70,28 @@
         ]
       }
     },
+    "/api/v1alpha1/users/projects/roles": {
+      "get": {
+        "operationId": "CurrentUser_GetProjectRoles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alpha1GetProjectRolesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "CurrentUser"
+        ]
+      }
+    },
     "/apis/v1alpha1/current-user/access-tokens": {
       "post": {
         "operationId": "CurrentUser_CreateAccessToken",
@@ -198,6 +220,17 @@
     },
     "v1alpha1DeleteAccessTokenResponse": {
       "type": "object"
+    },
+    "v1alpha1GetProjectRolesResponse": {
+      "type": "object",
+      "properties": {
+        "projectRoles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
     },
     "v1alpha1ListAccessTokensResponse": {
       "type": "object",

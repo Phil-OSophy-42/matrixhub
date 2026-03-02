@@ -30,6 +30,12 @@ service CurrentUser {
       delete: "/apis/v1alpha1/current-user/access-tokens/{id}"
     };
   }
+
+  rpc GetProjectRoles(GetProjectRolesRequest) returns (GetProjectRolesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1alpha1/users/projects/roles"
+    };
+  }
 }
 
 message ResetPasswordRequest {
@@ -66,3 +72,9 @@ message DeleteAccessTokenRequest {
 }
 
 message DeleteAccessTokenResponse {}
+
+message GetProjectRolesRequest {}
+
+message GetProjectRolesResponse {
+  map<string, string> project_roles = 1;
+}
