@@ -10,6 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminReplicationsRouteImport } from './routes/admin/replications'
+import { Route as AdminRegistriesRouteImport } from './routes/admin/registries'
 import { Route as appLayoutRouteImport } from './routes/(app)/_layout'
 import { Route as appLayoutIndexRouteImport } from './routes/(app)/_layout/index'
 import { Route as appLayoutAboutRouteImport } from './routes/(app)/_layout/about'
@@ -17,7 +22,9 @@ import { Route as appLayoutProjectsIndexRouteImport } from './routes/(app)/_layo
 import { Route as appLayoutProfileIndexRouteImport } from './routes/(app)/_layout/profile/index'
 import { Route as appLayoutModelsIndexRouteImport } from './routes/(app)/_layout/models/index'
 import { Route as appLayoutDatasetsIndexRouteImport } from './routes/(app)/_layout/datasets/index'
-import { Route as appLayoutAdminSplatRouteImport } from './routes/(app)/_layout/admin/$'
+import { Route as AdminReplicationsReplicationIdExecutionsRouteImport } from './routes/admin/replications_.$replicationId.executions'
+import { Route as appLayoutModelsNewRouteImport } from './routes/(app)/_layout/models/new'
+import { Route as appLayoutDatasetsNewRouteImport } from './routes/(app)/_layout/datasets/new'
 import { Route as appLayoutProjectsProjectIdIndexRouteImport } from './routes/(app)/_layout/projects/$projectId/index'
 import { Route as appLayoutProjectsProjectIdSettingsIndexRouteImport } from './routes/(app)/_layout/projects/$projectId/settings/index'
 import { Route as appLayoutProjectsProjectIdModelsIndexRouteImport } from './routes/(app)/_layout/projects/$projectId/models/index'
@@ -40,6 +47,31 @@ const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReplicationsRoute = AdminReplicationsRouteImport.update({
+  id: '/replications',
+  path: '/replications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRegistriesRoute = AdminRegistriesRouteImport.update({
+  id: '/registries',
+  path: '/registries',
+  getParentRoute: () => AdminRoute,
 } as any)
 const appLayoutRoute = appLayoutRouteImport.update({
   id: '/(app)/_layout',
@@ -75,9 +107,20 @@ const appLayoutDatasetsIndexRoute = appLayoutDatasetsIndexRouteImport.update({
   path: '/datasets/',
   getParentRoute: () => appLayoutRoute,
 } as any)
-const appLayoutAdminSplatRoute = appLayoutAdminSplatRouteImport.update({
-  id: '/admin/$',
-  path: '/admin/$',
+const AdminReplicationsReplicationIdExecutionsRoute =
+  AdminReplicationsReplicationIdExecutionsRouteImport.update({
+    id: '/replications_/$replicationId/executions',
+    path: '/replications/$replicationId/executions',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const appLayoutModelsNewRoute = appLayoutModelsNewRouteImport.update({
+  id: '/models/new',
+  path: '/models/new',
+  getParentRoute: () => appLayoutRoute,
+} as any)
+const appLayoutDatasetsNewRoute = appLayoutDatasetsNewRouteImport.update({
+  id: '/datasets/new',
+  path: '/datasets/new',
   getParentRoute: () => appLayoutRoute,
 } as any)
 const appLayoutProjectsProjectIdIndexRoute =
@@ -186,10 +229,17 @@ const appLayoutProjectsProjectIdDatasetsDatasetIdBlobRefSplatRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/admin/registries': typeof AdminRegistriesRoute
+  '/admin/replications': typeof AdminReplicationsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/': typeof AdminIndexRoute
   '/about': typeof appLayoutAboutRoute
   '/': typeof appLayoutIndexRoute
-  '/admin/$': typeof appLayoutAdminSplatRoute
+  '/datasets/new': typeof appLayoutDatasetsNewRoute
+  '/models/new': typeof appLayoutModelsNewRoute
+  '/admin/replications/$replicationId/executions': typeof AdminReplicationsReplicationIdExecutionsRoute
   '/datasets/': typeof appLayoutDatasetsIndexRoute
   '/models/': typeof appLayoutModelsIndexRoute
   '/profile/': typeof appLayoutProfileIndexRoute
@@ -214,9 +264,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/admin/registries': typeof AdminRegistriesRoute
+  '/admin/replications': typeof AdminReplicationsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin': typeof AdminIndexRoute
   '/about': typeof appLayoutAboutRoute
   '/': typeof appLayoutIndexRoute
-  '/admin/$': typeof appLayoutAdminSplatRoute
+  '/datasets/new': typeof appLayoutDatasetsNewRoute
+  '/models/new': typeof appLayoutModelsNewRoute
+  '/admin/replications/$replicationId/executions': typeof AdminReplicationsReplicationIdExecutionsRoute
   '/datasets': typeof appLayoutDatasetsIndexRoute
   '/models': typeof appLayoutModelsIndexRoute
   '/profile': typeof appLayoutProfileIndexRoute
@@ -241,11 +297,18 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/(app)/_layout': typeof appLayoutRouteWithChildren
+  '/admin/registries': typeof AdminRegistriesRoute
+  '/admin/replications': typeof AdminReplicationsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/': typeof AdminIndexRoute
   '/(app)/_layout/about': typeof appLayoutAboutRoute
   '/(app)/_layout/': typeof appLayoutIndexRoute
-  '/(app)/_layout/admin/$': typeof appLayoutAdminSplatRoute
+  '/(app)/_layout/datasets/new': typeof appLayoutDatasetsNewRoute
+  '/(app)/_layout/models/new': typeof appLayoutModelsNewRoute
+  '/admin/replications_/$replicationId/executions': typeof AdminReplicationsReplicationIdExecutionsRoute
   '/(app)/_layout/datasets/': typeof appLayoutDatasetsIndexRoute
   '/(app)/_layout/models/': typeof appLayoutModelsIndexRoute
   '/(app)/_layout/profile/': typeof appLayoutProfileIndexRoute
@@ -271,10 +334,17 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/admin'
     | '/login'
+    | '/admin/registries'
+    | '/admin/replications'
+    | '/admin/users'
+    | '/admin/'
     | '/about'
     | '/'
-    | '/admin/$'
+    | '/datasets/new'
+    | '/models/new'
+    | '/admin/replications/$replicationId/executions'
     | '/datasets/'
     | '/models/'
     | '/profile/'
@@ -299,9 +369,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/admin/registries'
+    | '/admin/replications'
+    | '/admin/users'
+    | '/admin'
     | '/about'
     | '/'
-    | '/admin/$'
+    | '/datasets/new'
+    | '/models/new'
+    | '/admin/replications/$replicationId/executions'
     | '/datasets'
     | '/models'
     | '/profile'
@@ -325,11 +401,18 @@ export interface FileRouteTypes {
     | '/projects/$projectId/models/$modelId/commits/$ref'
   id:
     | '__root__'
+    | '/admin'
     | '/login'
     | '/(app)/_layout'
+    | '/admin/registries'
+    | '/admin/replications'
+    | '/admin/users'
+    | '/admin/'
     | '/(app)/_layout/about'
     | '/(app)/_layout/'
-    | '/(app)/_layout/admin/$'
+    | '/(app)/_layout/datasets/new'
+    | '/(app)/_layout/models/new'
+    | '/admin/replications_/$replicationId/executions'
     | '/(app)/_layout/datasets/'
     | '/(app)/_layout/models/'
     | '/(app)/_layout/profile/'
@@ -354,6 +437,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
   appLayoutRoute: typeof appLayoutRouteWithChildren
 }
@@ -366,6 +450,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/replications': {
+      id: '/admin/replications'
+      path: '/replications'
+      fullPath: '/admin/replications'
+      preLoaderRoute: typeof AdminReplicationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/registries': {
+      id: '/admin/registries'
+      path: '/registries'
+      fullPath: '/admin/registries'
+      preLoaderRoute: typeof AdminRegistriesRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/(app)/_layout': {
       id: '/(app)/_layout'
@@ -416,11 +535,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appLayoutDatasetsIndexRouteImport
       parentRoute: typeof appLayoutRoute
     }
-    '/(app)/_layout/admin/$': {
-      id: '/(app)/_layout/admin/$'
-      path: '/admin/$'
-      fullPath: '/admin/$'
-      preLoaderRoute: typeof appLayoutAdminSplatRouteImport
+    '/admin/replications_/$replicationId/executions': {
+      id: '/admin/replications_/$replicationId/executions'
+      path: '/replications/$replicationId/executions'
+      fullPath: '/admin/replications/$replicationId/executions'
+      preLoaderRoute: typeof AdminReplicationsReplicationIdExecutionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/(app)/_layout/models/new': {
+      id: '/(app)/_layout/models/new'
+      path: '/models/new'
+      fullPath: '/models/new'
+      preLoaderRoute: typeof appLayoutModelsNewRouteImport
+      parentRoute: typeof appLayoutRoute
+    }
+    '/(app)/_layout/datasets/new': {
+      id: '/(app)/_layout/datasets/new'
+      path: '/datasets/new'
+      fullPath: '/datasets/new'
+      preLoaderRoute: typeof appLayoutDatasetsNewRouteImport
       parentRoute: typeof appLayoutRoute
     }
     '/(app)/_layout/projects/$projectId/': {
@@ -545,10 +678,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminRegistriesRoute: typeof AdminRegistriesRoute
+  AdminReplicationsRoute: typeof AdminReplicationsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminReplicationsReplicationIdExecutionsRoute: typeof AdminReplicationsReplicationIdExecutionsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminRegistriesRoute: AdminRegistriesRoute,
+  AdminReplicationsRoute: AdminReplicationsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminReplicationsReplicationIdExecutionsRoute:
+    AdminReplicationsReplicationIdExecutionsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface appLayoutRouteChildren {
   appLayoutAboutRoute: typeof appLayoutAboutRoute
   appLayoutIndexRoute: typeof appLayoutIndexRoute
-  appLayoutAdminSplatRoute: typeof appLayoutAdminSplatRoute
+  appLayoutDatasetsNewRoute: typeof appLayoutDatasetsNewRoute
+  appLayoutModelsNewRoute: typeof appLayoutModelsNewRoute
   appLayoutDatasetsIndexRoute: typeof appLayoutDatasetsIndexRoute
   appLayoutModelsIndexRoute: typeof appLayoutModelsIndexRoute
   appLayoutProfileIndexRoute: typeof appLayoutProfileIndexRoute
@@ -575,7 +728,8 @@ interface appLayoutRouteChildren {
 const appLayoutRouteChildren: appLayoutRouteChildren = {
   appLayoutAboutRoute: appLayoutAboutRoute,
   appLayoutIndexRoute: appLayoutIndexRoute,
-  appLayoutAdminSplatRoute: appLayoutAdminSplatRoute,
+  appLayoutDatasetsNewRoute: appLayoutDatasetsNewRoute,
+  appLayoutModelsNewRoute: appLayoutModelsNewRoute,
   appLayoutDatasetsIndexRoute: appLayoutDatasetsIndexRoute,
   appLayoutModelsIndexRoute: appLayoutModelsIndexRoute,
   appLayoutProfileIndexRoute: appLayoutProfileIndexRoute,
@@ -620,6 +774,7 @@ const appLayoutRouteWithChildren = appLayoutRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
   appLayoutRoute: appLayoutRouteWithChildren,
 }
