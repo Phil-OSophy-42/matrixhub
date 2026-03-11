@@ -1,6 +1,6 @@
 # Implementation Constraints
 
-This document combines the current UI stack and the key rules around Mantine, TanStack Router, TanStack Form, Zod, and i18n.
+This document combines the current UI stack and the key rules around Mantine, TanStack Router, TanStack Form, Zod, table implementation, and i18n.
 
 ## Stack
 
@@ -21,6 +21,7 @@ This document combines the current UI stack and the key rules around Mantine, Ta
 - `babel-plugin-react-compiler` is enabled and should not be removed casually
 - `VITE_UI_BASE_PATH` controls the deployed UI base path
 - `src/routeTree.gen.ts` is generated and must only be produced by tooling
+- If an agent creates, changes, or expands a shared wrapper, shared component convention, or other stable implementation pattern, the agent must update the relevant docs under `ui/agents/` in the same change
 
 ## Mantine
 
@@ -95,6 +96,14 @@ function CreateProjectForm() {
   )
 }
 ```
+
+## Tables
+
+- Use `mantine-react-table` as the default library for new data-table work
+- Any place that needs a data table should use the project's wrapped table component or adapter instead of wiring `mantine-react-table` directly in the page
+- If the required wrapper does not exist yet, create or extend the project table wrapper first, then use that wrapper in the page
+- Centralize shared table styling and behavior in the wrapper, including pagination, loading states, empty states, row actions, selection behavior, and similar concerns
+- Do not introduce a different table abstraction or second table library for the same class of UI without agreement
 
 ## Feature Page Splitting Guidelines
 

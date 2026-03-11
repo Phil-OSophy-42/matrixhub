@@ -21,6 +21,7 @@ Default project rules, collaboration conventions, and example materials live in 
 - Humans usually provide task inputs such as Figma links, screenshots, API references, and short remarks.
 - The agent reads the project rules first, then uses `task.md` only when a specific feature task chose that lightweight example format for local working notes.
 - The agent should infer route placement, feature structure, API usage, and implementation details from the rules and codebase unless the task explicitly says otherwise.
+- If the agent creates, changes, or expands a shared wrapper, shared component convention, or other stable project pattern, the agent must update the relevant `ui/agents/` docs in the same change.
 
 ## Rules And Inputs
 
@@ -48,6 +49,7 @@ If directories such as `.claude/`, `.codex/`, or `.opencode/` appear later, they
 - Keep adding complex business logic directly in `src/routes`
 - Add more hardcoded user-facing copy for new UI
 - Introduce a new form library, Mantine `useForm`, ad-hoc form state, or a different validation scheme for new forms when `TanStack Form` and `Zod` are the project standards
+- Use raw `mantine-react-table` components or page-local table wiring directly in feature pages instead of the project's wrapped table component or adapter
 - Build a parallel styling system when Mantine theme tokens already cover the use case
 - Add new top-level architecture layers without agreement
 

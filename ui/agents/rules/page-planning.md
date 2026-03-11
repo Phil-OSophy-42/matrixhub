@@ -25,6 +25,7 @@ Typical inputs are enough if they are available: a Figma link, Figma MCP referen
 6. Which parts come from design inputs or requirements, and which gaps should be filled by existing code and Mantine
 7. Which API reads and writes the page depends on, and which API surfaces are intentionally not needed yet
 8. If the page includes forms, which form sections, `Zod` schemas, validation rules, submit flows, and success or error states should be modeled with `TanStack Form`
+9. If the page includes a data table, which project table wrapper it should use or extend, and which shared styling or behavior must be centralized in that wrapper instead of left page-specific
 
 ## Component Split Guidelines
 
@@ -37,6 +38,7 @@ Typical inputs are enough if they are available: a Figma link, Figma MCP referen
 
 - Learn from existing code patterns first, then add rules only when necessary
 - For a new page, do the page plan first and implementation second
+- If the work introduces or changes a shared wrapper, shared component convention, or other stable project pattern, update the relevant `ui/agents/` docs in the same change
 - When uncertain, choose the smaller change that is easier to roll back
 - If a rule changes, write it down in the docs instead of leaving it in chat history only
 
