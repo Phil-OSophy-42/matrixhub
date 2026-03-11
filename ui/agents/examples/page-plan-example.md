@@ -1,15 +1,12 @@
 # Page Plan Example: Models List Within A Project
 
-This example shows how to combine `modao`, `figma`, existing code, and API planning into a page plan that can be executed directly.
+This example shows how to combine the requirement, `figma`, existing code, and API planning into a page plan that can be executed directly.
 
 ## 1. Inputs
 
 - Route / requirement:
   - Route: `src/routes/(auth)/(app)/projects/$projectId/models/index.tsx`
   - Goal: show the models list under a project and provide an entry point for creating a new model
-- Modao:
-  - Confirms the page flow: enter project detail -> view model list -> click create -> navigate to the creation page
-  - Confirms the information structure: page title, filter area, list area, empty state, and create button
 - Figma:
   - Confirms the visual hierarchy: header, action area, table or list body, and empty state area
   - Confirms layout rhythm: spacing between header and list, action button placement on the top right, and list items shown as either table rows or cards
@@ -63,7 +60,21 @@ This example shows how to combine `modao`, `figma`, existing code, and API plann
 
 ## 5. API Plan
 
-<!-- TODO -->
+- SDK module:
+  - `@matrixhub/api-ts/v1alpha1/model.pb`
+- Read operations:
+  - `Models.ListModels({ project, page, pageSize, search })`
+  - `project` comes from the route param
+  - `page`, `pageSize`, and `search` come from page state or search params
+- First version needs:
+  - the list response and pagination data only
+  - no separate detail request if the page only shows the list
+- First version does not need:
+  - a new global `src/api` layer
+  - shared query wrappers if only this page is using the call pattern
+  - unrelated model write APIs
+- Open questions:
+  - whether search state should live in route search params or local page state
 
 ## 6. Locale Plan
 

@@ -6,20 +6,14 @@ The goal is not to produce a large document. The goal is to align inputs, page b
 
 ## Recommended Sequence
 
-1. Read `ui/.planning/<task-slug>/task.md` first to confirm the task goal, references, and open questions
-2. Review the requirement and route entry point
-3. Review the `modao` prototype to understand flow and information structure
-4. Review `figma` to understand visual hierarchy, layout, and component shape
-5. Review adjacent pages, existing components, and current Mantine patterns
-6. If the page depends on data, add the API notes as part of the plan
-7. Start route and feature implementation only after the page plan is aligned
+1. Read `ui/AGENTS.md` and the relevant docs under `ui/agents/`
+2. Review the route entry point and nearby pages
+3. Review `figma`, screenshots, or the requirement description to understand the page structure, visual hierarchy, layout, and component shape
+4. Inspect adjacent pages, existing components, and current Mantine patterns
+5. Inspect the relevant SDK / API definition when the page depends on data
+6. Start route and feature implementation only after the page plan is aligned
 
-## How To Resolve Conflicting Inputs
-
-- `modao` primarily answers what the page needs to do and how the flow should work
-- `figma` primarily answers what the page should look like and how the hierarchy should read
-- If `figma` is incomplete, fill the gap by following existing implemented pages and Mantine conventions first
-- Do not invent a brand-new page pattern just because part of the design is missing
+Typical inputs are enough if they are available: a Figma link, Figma MCP reference, CLI Dev Mode access, screenshots, a short requirement description, a relevant API file or SDK module, and short free-form notes. A separate requirement document is optional.
 
 ## A Page Plan Should At Least Answer
 
@@ -28,8 +22,8 @@ The goal is not to produce a large document. The goal is to align inputs, page b
 3. What the main sections or components of the page are
 4. Which user-facing copy is needed and which locale keys should be added
 5. Which states the page has: loading, empty, error, and success
-6. Which parts come from `figma`, and which gaps should be filled by existing code and Mantine
-7. Which API reads and writes the page depends on
+6. Which parts come from design inputs or requirements, and which gaps should be filled by existing code and Mantine
+7. Which API reads and writes the page depends on, and which API surfaces are intentionally not needed yet
 
 ## Component Split Guidelines
 
@@ -47,11 +41,10 @@ The goal is not to produce a large document. The goal is to align inputs, page b
 
 ## Recommended Artifact
 
-Prefer maintaining one short, real, executable page plan. It can live as a section inside `task.md`.
+Prefer maintaining one short, real, executable page plan.
 
 Typical locations:
 
 - the PR description
 - a page-planning section in the requirement doc
-- a page-planning section in `ui/.planning/<task-slug>/task.md`
 - a document following the format of `ui/agents/examples/page-plan-example.md`

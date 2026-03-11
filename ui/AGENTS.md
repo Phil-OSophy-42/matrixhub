@@ -7,15 +7,22 @@ Default project rules, collaboration conventions, and example materials live in 
 ## Read Order
 
 1. Read this file first.
-2. Then read the relevant docs based on the scope of the task:
-   - Structure and boundaries: `ui/agents/rules/structure.md`
-   - Implementation constraints: `ui/agents/rules/implementation.md`
-   - Page planning: `ui/agents/rules/page-planning.md`
-   - API notes: `ui/agents/rules/api-layer.md`
-   - Review checklist: `ui/agents/collaboration/review-checklist.md`
-   - Page planning example: `ui/agents/examples/page-plan-example.md`
+2. Then read the relevant docs under `ui/agents/`:
+   - `ui/agents/rules/structure.md` for boundaries and folder responsibility
+   - `ui/agents/rules/implementation.md` for stack and implementation constraints
+   - `ui/agents/rules/page-planning.md` for new page work
+   - `ui/agents/rules/api-layer.md` for generated SDK usage
+   - `ui/agents/collaboration/review-checklist.md` when reviewing or before handoff
+3. Use `ui/agents/examples/page-plan-example.md` only when a concrete example is useful.
+4. If `ui/.planning/<task-slug>/task.md` exists, treat it as supplemental task input only. It does not override project rules.
 
-## Source Of Truth
+## Workflow
+
+- Humans usually provide task inputs such as Figma links, screenshots, API references, and short remarks.
+- The agent reads the project rules first, then uses `task.md` only for current-task inputs, exceptions, and extra notes.
+- The agent should infer route placement, feature structure, API usage, and implementation details from the rules and codebase unless the task explicitly says otherwise.
+
+## Rules And Inputs
 
 - `ui/agents/rules/*`: core project rules
 - `ui/agents/collaboration/*`: collaboration checklists and review conventions
@@ -26,27 +33,14 @@ Temporary task materials should live under `ui/.planning/<task-slug>/`.
 
 Organize the folder by task, and only keep inputs and drafts that are actually needed for that task. Typical contents include:
 
-- `task.md`: the working brief for the current task, including references, page planning, temporary notes, and open questions
+- `task.md`: an optional lightweight note for the current task, usually just inputs, special remarks, and open questions
 - Other local attachments: screenshots, cropped images, exported docs, and similar working files
+
+Typical inputs can be as small as a Figma link, Figma MCP reference, CLI Dev Mode access, screenshots, and a few short notes. The default expectation is that humans provide only inputs and special remarks; the agent should infer implementation details from the rules and codebase unless the task has unusual constraints.
 
 `ui/.planning/` is a local working directory and is already ignored by `.gitignore`. Use it for task inputs, comparisons, and drafts, but do not treat it as a long-term rules repository.
 
 If directories such as `.claude/`, `.codex/`, or `.opencode/` appear later, they are adapters only. They must not become the source of project rules.
-
-## Current Code Boundaries
-
-- `src/routes`: route files, layouts, redirects, and route-level metadata
-- `src/features`: non-trivial pages and feature-local implementation
-- `src/i18n`: i18n bootstrap and resource loading
-- `src/locales`: translation resource files
-- `src/main.tsx`, `src/router.tsx`, `src/mantineTheme.ts`: app-level infrastructure
-- `src/routeTree.gen.ts`: generated file, do not edit manually
-
-## Incremental Adoption
-
-- These rules apply first to new code and code currently being changed.
-- Existing files may be migrated gradually. Do not force a large refactor just to satisfy the rules in one pass.
-- When a route file becomes too complex, move UI and logic into `src/features` and keep the route file as a thin adapter.
 
 ## Do Not
 
