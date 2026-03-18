@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "v1alpha1/replication.proto",
+    "title": "v1alpha1/sync_policy.proto",
     "version": "version not set"
   },
   "tags": [
     {
-      "name": "Replication"
+      "name": "SyncPolicy"
     }
   ],
   "consumes": [
@@ -16,15 +16,15 @@
     "application/json"
   ],
   "paths": {
-    "/api/v1alpha1/replications": {
+    "/api/v1alpha1/sync-policies": {
       "get": {
-        "summary": "ListReplications lists all replications.",
-        "operationId": "Replication_ListReplications",
+        "summary": "ListSyncPolicies lists all sync policies.",
+        "operationId": "SyncPolicy_ListSyncPolicies",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1ListReplicationsResponse"
+              "$ref": "#/definitions/v1alpha1ListSyncPoliciesResponse"
             }
           },
           "default": {
@@ -57,17 +57,17 @@
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       },
       "post": {
-        "summary": "CreateReplication creates a new replication.",
-        "operationId": "Replication_CreateReplication",
+        "summary": "CreateSyncPolicy creates a new sync policy.",
+        "operationId": "SyncPolicy_CreateSyncPolicy",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1CreateReplicationResponse"
+              "$ref": "#/definitions/v1alpha1CreateSyncPolicyResponse"
             }
           },
           "default": {
@@ -83,24 +83,24 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1alpha1CreateReplicationRequest"
+              "$ref": "#/definitions/v1alpha1CreateSyncPolicyRequest"
             }
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       }
     },
-    "/api/v1alpha1/replications/{replicationId}": {
+    "/api/v1alpha1/sync-policies/{syncPolicyId}": {
       "get": {
-        "summary": "GetReplication gets a replication by id.",
-        "operationId": "Replication_GetReplication",
+        "summary": "GetSyncPolicy gets a sync policy by id.",
+        "operationId": "SyncPolicy_GetSyncPolicy",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1GetReplicationResponse"
+              "$ref": "#/definitions/v1alpha1GetSyncPolicyResponse"
             }
           },
           "default": {
@@ -112,7 +112,7 @@
         },
         "parameters": [
           {
-            "name": "replicationId",
+            "name": "syncPolicyId",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -120,17 +120,17 @@
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       },
       "delete": {
-        "summary": "DeleteReplication deletes a replication.",
-        "operationId": "Replication_DeleteReplication",
+        "summary": "DeleteSyncPolicy deletes a sync policy.",
+        "operationId": "SyncPolicy_DeleteSyncPolicy",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1DeleteReplicationResponse"
+              "$ref": "#/definitions/v1alpha1DeleteSyncPolicyResponse"
             }
           },
           "default": {
@@ -142,7 +142,7 @@
         },
         "parameters": [
           {
-            "name": "replicationId",
+            "name": "syncPolicyId",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -150,17 +150,17 @@
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       },
       "put": {
-        "summary": "UpdateReplication updates a replication.",
-        "operationId": "Replication_UpdateReplication",
+        "summary": "UpdateSyncPolicy updates a sync policy.",
+        "operationId": "SyncPolicy_UpdateSyncPolicy",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1UpdateReplicationResponse"
+              "$ref": "#/definitions/v1alpha1UpdateSyncPolicyResponse"
             }
           },
           "default": {
@@ -172,7 +172,7 @@
         },
         "parameters": [
           {
-            "name": "replicationId",
+            "name": "syncPolicyId",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -183,24 +183,24 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ReplicationUpdateReplicationBody"
+              "$ref": "#/definitions/SyncPolicyUpdateSyncPolicyBody"
             }
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       }
     },
-    "/api/v1alpha1/replications/{replicationId}/executions": {
+    "/api/v1alpha1/sync-policies/{syncPolicyId}/sync-tasks": {
       "get": {
-        "summary": "ListReplicationExecutions lists all replication executions.",
-        "operationId": "Replication_ListReplicationExecutions",
+        "summary": "ListSyncTasks lists all sync tasks.",
+        "operationId": "SyncPolicy_ListSyncTasks",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1ListReplicationExecutionsResponse"
+              "$ref": "#/definitions/v1alpha1ListSyncTasksResponse"
             }
           },
           "default": {
@@ -212,7 +212,7 @@
         },
         "parameters": [
           {
-            "name": "replicationId",
+            "name": "syncPolicyId",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -240,17 +240,17 @@
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       },
       "post": {
-        "summary": "CreateReplicationExecution creates a new replication execution.",
-        "operationId": "Replication_CreateReplicationExecution",
+        "summary": "CreateSyncTask creates a new sync task.",
+        "operationId": "SyncPolicy_CreateSyncTask",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1CreateReplicationExecutionResponse"
+              "$ref": "#/definitions/v1alpha1CreateSyncTaskResponse"
             }
           },
           "default": {
@@ -262,7 +262,7 @@
         },
         "parameters": [
           {
-            "name": "replicationId",
+            "name": "syncPolicyId",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -270,19 +270,19 @@
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       }
     },
-    "/api/v1alpha1/replications/{replicationId}/executions/{executionId}/stop": {
+    "/api/v1alpha1/sync-policies/{syncPolicyId}/sync-tasks/{syncTaskId}/stop": {
       "post": {
-        "summary": "StopReplicationExecution stops a replication execution.",
-        "operationId": "Replication_StopReplicationExecution",
+        "summary": "StopSyncTask stops a sync task.",
+        "operationId": "SyncPolicy_StopSyncTask",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1alpha1StopReplicationExecutionResponse"
+              "$ref": "#/definitions/v1alpha1StopSyncTaskResponse"
             }
           },
           "default": {
@@ -294,14 +294,14 @@
         },
         "parameters": [
           {
-            "name": "replicationId",
+            "name": "syncPolicyId",
             "in": "path",
             "required": true,
             "type": "integer",
             "format": "int32"
           },
           {
-            "name": "executionId",
+            "name": "syncTaskId",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -309,13 +309,13 @@
           }
         ],
         "tags": [
-          "Replication"
+          "SyncPolicy"
         ]
       }
     }
   },
   "definitions": {
-    "ReplicationUpdateReplicationBody": {
+    "SyncPolicyUpdateSyncPolicyBody": {
       "type": "object",
       "properties": {
         "name": {
@@ -325,7 +325,7 @@
           "type": "string"
         },
         "triggerType": {
-          "$ref": "#/definitions/v1alpha1triggerType"
+          "$ref": "#/definitions/v1alpha1TriggerType"
         },
         "pullBasePolicy": {
           "$ref": "#/definitions/v1alpha1PullBasePolicy"
@@ -335,7 +335,7 @@
         },
         "bandwidth": {
           "type": "string",
-          "description": "The bandwidth to use for the replication."
+          "description": "The bandwidth to use for the sync policy."
         },
         "isOverwrite": {
           "type": "boolean"
@@ -373,16 +373,7 @@
         }
       }
     },
-    "v1alpha1CreateReplicationExecutionResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "v1alpha1CreateReplicationRequest": {
+    "v1alpha1CreateSyncPolicyRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -392,10 +383,10 @@
           "type": "string"
         },
         "policyType": {
-          "$ref": "#/definitions/v1alpha1ReplicationPolicyType"
+          "$ref": "#/definitions/v1alpha1SyncPolicyType"
         },
         "triggerType": {
-          "$ref": "#/definitions/v1alpha1triggerType"
+          "$ref": "#/definitions/v1alpha1TriggerType"
         },
         "pullBasePolicy": {
           "$ref": "#/definitions/v1alpha1PullBasePolicy"
@@ -405,45 +396,54 @@
         },
         "bandwidth": {
           "type": "string",
-          "description": "The bandwidth to use for the replication."
+          "description": "The bandwidth to use for the sync policy."
         },
         "isOverwrite": {
           "type": "boolean"
         }
       }
     },
-    "v1alpha1CreateReplicationResponse": {
+    "v1alpha1CreateSyncPolicyResponse": {
       "type": "object",
       "properties": {
-        "replication": {
-          "$ref": "#/definitions/v1alpha1ReplicationItem"
+        "syncPolicy": {
+          "$ref": "#/definitions/v1alpha1SyncPolicyItem"
         }
       }
     },
-    "v1alpha1DeleteReplicationResponse": {
+    "v1alpha1CreateSyncTaskResponse": {
       "type": "object",
       "properties": {
-        "replication": {
-          "$ref": "#/definitions/v1alpha1ReplicationItem"
+        "id": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
-    "v1alpha1GetReplicationResponse": {
+    "v1alpha1DeleteSyncPolicyResponse": {
       "type": "object",
       "properties": {
-        "replication": {
-          "$ref": "#/definitions/v1alpha1ReplicationItem"
+        "syncPolicy": {
+          "$ref": "#/definitions/v1alpha1SyncPolicyItem"
         }
       }
     },
-    "v1alpha1ListReplicationExecutionsResponse": {
+    "v1alpha1GetSyncPolicyResponse": {
       "type": "object",
       "properties": {
-        "executions": {
+        "syncPolicy": {
+          "$ref": "#/definitions/v1alpha1SyncPolicyItem"
+        }
+      }
+    },
+    "v1alpha1ListSyncPoliciesResponse": {
+      "type": "object",
+      "properties": {
+        "syncPolicies": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1alpha1ReplicationExecution"
+            "$ref": "#/definitions/v1alpha1SyncPolicyItem"
           }
         },
         "pagination": {
@@ -451,14 +451,14 @@
         }
       }
     },
-    "v1alpha1ListReplicationsResponse": {
+    "v1alpha1ListSyncTasksResponse": {
       "type": "object",
       "properties": {
-        "replications": {
+        "syncTasks": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1alpha1ReplicationItem"
+            "$ref": "#/definitions/v1alpha1SyncTask"
           }
         },
         "pagination": {
@@ -620,22 +620,86 @@
       ],
       "default": "REGISTRY_TYPE_UNSPECIFIED"
     },
-    "v1alpha1ReplicationExecution": {
+    "v1alpha1ResourceType": {
+      "type": "string",
+      "enum": [
+        "RESOURCE_TYPE_UNSPECIFIED",
+        "RESOURCE_TYPE_MODEL",
+        "RESOURCE_TYPE_DATASET",
+        "RESOURCE_TYPE_ALL"
+      ],
+      "default": "RESOURCE_TYPE_UNSPECIFIED"
+    },
+    "v1alpha1StopSyncTaskResponse": {
+      "type": "object",
+      "properties": {
+        "syncTask": {
+          "$ref": "#/definitions/v1alpha1SyncTask"
+        }
+      }
+    },
+    "v1alpha1SyncPolicyItem": {
       "type": "object",
       "properties": {
         "id": {
           "type": "integer",
           "format": "int32"
         },
-        "replicationId": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "policyType": {
+          "$ref": "#/definitions/v1alpha1SyncPolicyType"
+        },
+        "triggerType": {
+          "$ref": "#/definitions/v1alpha1TriggerType"
+        },
+        "pullBasePolicy": {
+          "$ref": "#/definitions/v1alpha1PullBasePolicy"
+        },
+        "pushBasePolicy": {
+          "$ref": "#/definitions/v1alpha1PushBasePolicy"
+        },
+        "bandwidth": {
+          "type": "string",
+          "description": "The bandwidth to use for the sync policy."
+        },
+        "isOverwrite": {
+          "type": "boolean"
+        },
+        "isDisabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1alpha1SyncPolicyType": {
+      "type": "string",
+      "enum": [
+        "SYNC_POLICY_TYPE_UNSPECIFIED",
+        "SYNC_POLICY_TYPE_PULL_BASE",
+        "SYNC_POLICY_TYPE_PUSH_BASE"
+      ],
+      "default": "SYNC_POLICY_TYPE_UNSPECIFIED"
+    },
+    "v1alpha1SyncTask": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "syncPolicyId": {
           "type": "integer",
           "format": "int32"
         },
         "triggerType": {
-          "$ref": "#/definitions/v1alpha1triggerType"
+          "$ref": "#/definitions/v1alpha1TriggerType"
         },
         "status": {
-          "$ref": "#/definitions/v1alpha1ReplicationExecutionStatus"
+          "$ref": "#/definitions/v1alpha1SyncTaskStatus"
         },
         "startedTimestamp": {
           "type": "string",
@@ -655,90 +719,18 @@
         }
       }
     },
-    "v1alpha1ReplicationExecutionStatus": {
+    "v1alpha1SyncTaskStatus": {
       "type": "string",
       "enum": [
-        "REPLICATION_EXECUTION_STATUS_UNSPECIFIED",
-        "REPLICATION_EXECUTION_STATUS_RUNNING",
-        "REPLICATION_EXECUTION_STATUS_SUCCEEDED",
-        "REPLICATION_EXECUTION_STATUS_FAILED",
-        "REPLICATION_EXECUTION_STATUS_STOPPED"
+        "SYNC_TASK_STATUS_UNSPECIFIED",
+        "SYNC_TASK_STATUS_RUNNING",
+        "SYNC_TASK_STATUS_SUCCEEDED",
+        "SYNC_TASK_STATUS_FAILED",
+        "SYNC_TASK_STATUS_STOPPED"
       ],
-      "default": "REPLICATION_EXECUTION_STATUS_UNSPECIFIED"
+      "default": "SYNC_TASK_STATUS_UNSPECIFIED"
     },
-    "v1alpha1ReplicationItem": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "policyType": {
-          "$ref": "#/definitions/v1alpha1ReplicationPolicyType"
-        },
-        "triggerType": {
-          "$ref": "#/definitions/v1alpha1triggerType"
-        },
-        "pullBasePolicy": {
-          "$ref": "#/definitions/v1alpha1PullBasePolicy"
-        },
-        "pushBasePolicy": {
-          "$ref": "#/definitions/v1alpha1PushBasePolicy"
-        },
-        "bandwidth": {
-          "type": "string",
-          "description": "The bandwidth to use for the replication."
-        },
-        "isOverwrite": {
-          "type": "boolean"
-        },
-        "isDisabled": {
-          "type": "boolean"
-        }
-      }
-    },
-    "v1alpha1ReplicationPolicyType": {
-      "type": "string",
-      "enum": [
-        "REPLICATION_POLICY_TYPE_UNSPECIFIED",
-        "REPLICATION_POLICY_TYPE_PULL_BASE",
-        "REPLICATION_POLICY_TYPE_PUSH_BASE"
-      ],
-      "default": "REPLICATION_POLICY_TYPE_UNSPECIFIED"
-    },
-    "v1alpha1ResourceType": {
-      "type": "string",
-      "enum": [
-        "RESOURCE_TYPE_UNSPECIFIED",
-        "RESOURCE_TYPE_MODEL",
-        "RESOURCE_TYPE_DATASET",
-        "RESOURCE_TYPE_ALL"
-      ],
-      "default": "RESOURCE_TYPE_UNSPECIFIED"
-    },
-    "v1alpha1StopReplicationExecutionResponse": {
-      "type": "object",
-      "properties": {
-        "execution": {
-          "$ref": "#/definitions/v1alpha1ReplicationExecution"
-        }
-      }
-    },
-    "v1alpha1UpdateReplicationResponse": {
-      "type": "object",
-      "properties": {
-        "replication": {
-          "$ref": "#/definitions/v1alpha1ReplicationItem"
-        }
-      }
-    },
-    "v1alpha1triggerType": {
+    "v1alpha1TriggerType": {
       "type": "string",
       "enum": [
         "TRIGGER_TYPE_UNSPECIFIED",
@@ -746,6 +738,14 @@
         "TRIGGER_TYPE_SCHEDULED"
       ],
       "default": "TRIGGER_TYPE_UNSPECIFIED"
+    },
+    "v1alpha1UpdateSyncPolicyResponse": {
+      "type": "object",
+      "properties": {
+        "syncPolicy": {
+          "$ref": "#/definitions/v1alpha1SyncPolicyItem"
+        }
+      }
     }
   }
 }
