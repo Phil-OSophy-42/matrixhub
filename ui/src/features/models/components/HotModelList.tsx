@@ -28,7 +28,7 @@ export function HotModelList() {
           {t('model.recommend') }
         </Text>
         {hotModels.length > 4 && (
-          <Text onClick={toggle} fz="sm">
+          <Text component="button" type="button" onClick={toggle} fz="sm">
             {t('model.viewMore')}
           </Text>
         )}

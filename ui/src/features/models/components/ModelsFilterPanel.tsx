@@ -81,7 +81,7 @@ export function ModelsFilterPanel() {
     queryTab, queryValue,
   } = getModelSearchState(search)
 
-  // optimist state for better UX when switching tabs, will be overridden by url state if different
+  // optimistic state for better UX when switching tabs, will be overridden by url state if different
   const [activeTab, setActiveTab] = useState<ModelFilterTab>(queryTab)
   const [selectedNames, setSelectedNames] = useState<string[]>(queryValue)
 
@@ -106,6 +106,7 @@ export function ModelsFilterPanel() {
         task: undefined,
         library: undefined,
         project: undefined,
+        page: 1,
         [activeTab]: newVal.filter(Boolean).length ? newVal.filter(Boolean).join(',') : undefined,
       },
     })
@@ -124,6 +125,7 @@ export function ModelsFilterPanel() {
         task: undefined,
         library: undefined,
         project: undefined,
+        page: 1,
         [activeTab]: newVal,
       },
     })

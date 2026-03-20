@@ -1,15 +1,13 @@
 import {
-  IconClock as ClockIcon,
-  IconCube as ModelIcon,
-  IconApiApp as ProjectIcon,
-} from '@tabler/icons-react'
-import {
   Category, type Label, type Model,
 } from '@matrixhub/api-ts/v1alpha1/model.pb'
 import { filesize } from 'filesize'
 import humanFormat from 'human-format'
-import i18n from 'i18next'
 
+import ClockIcon from '@/assets/svgs/clock.svg?react'
+import ModelIcon from '@/assets/svgs/model.svg?react'
+import ProjectIcon from '@/assets/svgs/project.svg?react'
+import i18n from '@/i18n'
 import { LibraryBadge } from '@/shared/components/badges/LibraryBadge'
 import { ParameterCountBadge } from '@/shared/components/badges/ParameterCountBadge'
 import { TaskBadge } from '@/shared/components/badges/TaskBadge'
@@ -75,19 +73,19 @@ export function buildModelMetaItems(
     {
       key: 'project',
       label: i18n.t('common.fromProject'),
-      icon: options?.projectIcon ?? <ProjectIcon size={20} />,
+      icon: options?.projectIcon ?? <ProjectIcon width={20} height={20} />,
       value: model.project ?? projectId,
     },
     {
       key: 'size',
       label: i18n.t('common.modelSize'),
-      icon: options?.sizeIcon ?? <ModelIcon size={20} />,
+      icon: options?.sizeIcon ?? <ModelIcon width={20} height={20} />,
       value: formatStorageSize(model.size),
     },
     {
       key: 'updatedAt',
       label: i18n.t('common.updatedAt'),
-      icon: options?.updatedAtIcon ?? <ClockIcon size={20} />,
+      icon: options?.updatedAtIcon ?? <ClockIcon width={20} height={20} />,
       value: formatDateTime(model.updatedAt),
     },
   ]

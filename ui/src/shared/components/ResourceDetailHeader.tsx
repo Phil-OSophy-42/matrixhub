@@ -65,7 +65,7 @@ export function ResourceDetailHeader({
         {actions && <Group gap="sm">{actions}</Group>}
       </Group>
 
-      {badges?.length && (
+      {badges && badges?.length > 0 && (
         <Group gap={8} mb={12} wrap="nowrap">
           {badges.map(badge => (
             <Fragment key={badge.key}>
@@ -81,10 +81,10 @@ export function ResourceDetailHeader({
         </Group>
       )}
 
-      {metaItems?.length && (
+      {metaItems && metaItems?.length > 0 && (
         <Group gap={24} fz="xs" lh={rem(20)} c="dimmed">
           {metaItems?.map(item => (
-            <span key={item.label}>
+            <span key={item.key}>
               {item.label}
               {t('common.colon')}
               {item.value}
