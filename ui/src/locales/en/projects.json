@@ -20,6 +20,7 @@
       "public": "Public",
       "private": "Private",
       "proxyAddress": "Proxy Address",
+      "proxyOrganization": "Proxy Organization",
       "save": "Save",
       "cancel": "Cancel",
       "updateError": "Failed to update project settings"

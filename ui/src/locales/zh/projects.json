@@ -20,6 +20,7 @@
       "public": "公开",
       "private": "私有",
       "proxyAddress": "代理地址",
+      "proxyOrganization": "代理组织",
       "save": "保存",
       "cancel": "取消",
       "updateError": "更新项目设置失败"
