@@ -1,21 +1,51 @@
-import { Projects } from '@matrixhub/api-ts/v1alpha1/project.pb'
+import {
+  ProjectType, Projects, type UpdateProjectRequest,
+} from '@matrixhub/api-ts/v1alpha1/project.pb'
 import { mutationOptions } from '@tanstack/react-query'
 
 import i18n from '@/i18n'
 
 import { projectKeys } from './projects.query'
 
+import type { CreateProjectInput } from './projects.schema'
 import type { NotificationMeta } from '@/types/tanstack-query'
-import type { ProjectType } from '@matrixhub/api-ts/v1alpha1/project.pb'
 
-interface UpdateProjectInput {
-  name: string
-  type: ProjectType
+export function createProjectMutationOptions() {
+  return mutationOptions({
+    mutationFn: (input: CreateProjectInput) =>
+      Projects.CreateProject({
+        name: input.name,
+        type: input.isPublic
+          ? ProjectType.PROJECT_TYPE_PUBLIC
+          : ProjectType.PROJECT_TYPE_PRIVATE,
+        registryId: input.enabledProxy && input.registryId != null
+          ? { value: input.registryId }
+          : undefined,
+        organization: input.enabledProxy
+          ? input.organization
+          : undefined,
+      }),
+    meta: {
+      errorMessage: i18n.t('projects.createModal.createFailed'),
+      invalidates: [projectKeys.lists()],
+    } satisfies NotificationMeta,
+  })
+}
+
+export function deleteProjectMutationOptions() {
+  return mutationOptions({
+    mutationFn: (name: string) =>
+      Projects.DeleteProject({ name }),
+    meta: {
+      errorMessage: i18n.t('projects.deleteModal.deleteFailed'),
+      invalidates: [projectKeys.lists()],
+    } satisfies NotificationMeta,
+  })
 }
 
 export function updateProjectMutationOptions() {
   return mutationOptions({
-    mutationFn: (input: UpdateProjectInput) =>
+    mutationFn: (input: UpdateProjectRequest) =>
       Projects.UpdateProject(input),
     meta: {
       errorMessage: i18n.t('projects.detail.settingsPage.updateError'),

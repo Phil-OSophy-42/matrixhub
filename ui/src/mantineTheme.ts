@@ -1,5 +1,6 @@
 import {
   Alert,
+  Anchor,
   createTheme,
   rem,
   Tabs,
@@ -28,6 +29,11 @@ export const mantineTheme = createTheme({
     InputWrapper: InputWrapper.extend({
       defaultProps: {
         c: 'gray.7',
+      },
+    }),
+    Anchor: Anchor.extend({
+      defaultProps: {
+        c: 'blue.6',
       },
     }),
   },

@@ -1,7 +1,6 @@
 import {
   Anchor,
   Badge,
-  Button,
   Text,
 } from '@mantine/core'
 import { ProjectType } from '@matrixhub/api-ts/v1alpha1/project.pb'
@@ -9,11 +8,13 @@ import { Link } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { DataTable, type TableProps } from '@/shared/components/DataTable'
+import { DataTable } from '@/shared/components/DataTable'
 import { formatDateTime } from '@/shared/utils/date'
 
 import type { Project } from '@matrixhub/api-ts/v1alpha1/project.pb'
+import type { Pagination } from '@matrixhub/api-ts/v1alpha1/utils.pb'
 import type { MRT_ColumnDef } from 'mantine-react-table'
+import type { ReactNode } from 'react'
 
 function isPublicProject(type?: ProjectType) {
   return type === ProjectType.PROJECT_TYPE_PUBLIC
@@ -51,25 +52,29 @@ function ProjectVisibilityCell({ row }: ProjectCellProps) {
 
   return (
     <Badge
-      color={isPublic ? 'green' : 'gray'}
+      color={isPublic ? 'green' : 'yellow'}
       variant="light"
     >
       {isPublic
-        ? t('routes.projects.visibility.public')
-        : t('routes.projects.visibility.private')}
+        ? t('projects.visibility.public')
+        : t('projects.visibility.private')}
     </Badge>
   )
 }
 
 function ProjectProxyCell({ row }: ProjectCellProps) {
   const { t } = useTranslation()
+  const enabled = row.original.enabledRegistry
 
   return (
-    <Text size="sm">
-      {row.original.enabledRegistry
-        ? t('routes.projects.boolean.yes')
-        : t('routes.projects.boolean.no')}
-    </Text>
+    <Badge
+      color={enabled ? 'green' : 'red'}
+      variant="light"
+    >
+      {enabled
+        ? t('projects.boolean.yes')
+        : t('projects.boolean.no')}
+    </Badge>
   )
 }
 
@@ -83,15 +88,26 @@ function ProjectActionsCell({
   )?.onDelete
 
   return (
-    <Button
-      variant="subtle"
-      color="red"
-      size="compact-sm"
+    <Anchor
+      component="button"
+      size="sm"
       onClick={() => onDelete?.(row.original)}
     >
-      {t('routes.projects.actions.delete')}
-    </Button>
+      {t('projects.actions.delete')}
+    </Anchor>
   )
+}
+
+export interface ProjectsTableProps {
+  records: Project[]
+  pagination?: Pagination
+  page: number
+  loading?: boolean
+  searchValue?: string
+  onSearchChange?: (value: string) => void
+  onDelete: (item: Project) => void
+  onPageChange: (page: number) => void
+  toolbarExtra?: ReactNode
 }
 
 export function ProjectsTable({
@@ -101,52 +117,47 @@ export function ProjectsTable({
   loading,
   searchValue,
   onSearchChange,
-  onRefresh,
   onDelete,
-  onBatchDelete,
-  rowSelection,
-  onRowSelectionChange,
   onPageChange,
-  selectedCount,
   toolbarExtra,
-}: TableProps<Project>) {
+}: ProjectsTableProps) {
   const { t } = useTranslation()
 
   const columns = useMemo<MRT_ColumnDef<Project>[]>(() => [
     {
       accessorKey: 'name',
-      header: t('routes.projects.table.name'),
+      header: t('projects.table.name'),
       Cell: ProjectNameCell,
     },
     {
       id: 'type',
       enableSorting: false,
-      header: t('routes.projects.table.visibility'),
+      header: t('projects.table.visibility'),
       Cell: ProjectVisibilityCell,
     },
     {
       id: 'enabledRegistry',
       enableSorting: false,
-      header: t('routes.projects.table.proxy'),
+      header: t('projects.table.proxy'),
       Cell: ProjectProxyCell,
     },
     {
       accessorKey: 'modelCount',
-      header: t('routes.projects.table.modelCount'),
+      header: t('projects.table.modelCount'),
     },
     {
       accessorKey: 'datasetCount',
-      header: t('routes.projects.table.datasetCount'),
+      header: t('projects.table.datasetCount'),
     },
     {
       id: 'updatedAt',
-      header: t('routes.projects.table.updatedAt'),
+      header: t('projects.table.updatedAt'),
       accessorFn: row => formatDateTime(row.updatedAt),
     },
     {
       id: 'actions',
       enableSorting: false,
-      header: t('routes.projects.table.actions'),
+      header: t('projects.table.actions'),
       Cell: ProjectActionsCell,
     },
   ], [t])
@@ -158,22 +169,14 @@ export function ProjectsTable({
       pagination={pagination}
       page={page}
       loading={loading}
-      emptyTitle={t('routes.projects.table.empty')}
-      searchPlaceholder={t('routes.projects.searchPlaceholder')}
+      emptyTitle={t('projects.table.empty')}
+      searchPlaceholder={t('projects.searchPlaceholder')}
       searchValue={searchValue}
       onSearchChange={onSearchChange}
-      onRefresh={onRefresh}
-      onBatchDelete={onBatchDelete}
-      selectedCount={selectedCount}
       toolbarExtra={toolbarExtra}
       onPageChange={onPageChange}
-      enableRowSelection
-      rowSelection={rowSelection}
-      onRowSelectionChange={onRowSelectionChange}
       getRowId={row => String(row.name)}
       tableOptions={{
-        enableBatchRowSelection: true,
-        enableMultiRowSelection: true,
         meta: { onDelete },
       }}
     />
