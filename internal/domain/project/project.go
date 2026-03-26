@@ -59,8 +59,8 @@ const (
 
 type ProjectMember struct {
 	ID         int           `gorm:"primary_key"`
-	ProjectID  int           `gorm:"column:project_id;index"`
-	MemberID   string        `gorm:"column:member_id"`
+	ProjectID  *int          `gorm:"column:project_id;index"`
+	MemberID   int           `gorm:"column:member_id"`
 	MemberType MemberType    `gorm:"column:member_type"`
 	MemberName string        `gorm:"column:member_name;<-:false"`
 	RoleID     role.RoleType `gorm:"column:role_id"`
@@ -73,7 +73,7 @@ func (ProjectMember) TableName() string {
 }
 
 type Member struct {
-	MemberID   string
+	MemberID   int
 	MemberType MemberType
 }
 
@@ -90,4 +90,5 @@ type IProjectRepo interface {
 	AddProjectMemberWithRole(ctx context.Context, projectMember *ProjectMember) error
 	RemoveProjectMembers(ctx context.Context, projectID int, members []*Member) error
 	UpdateProjectMemberRole(ctx context.Context, projectID int, member Member, role role.RoleType) error
+	GetUserProjectRole(ctx context.Context, userID int, projectID int) (int, error)
 }

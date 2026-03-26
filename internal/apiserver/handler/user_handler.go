@@ -23,16 +23,31 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	userv1alpha1 "github.com/matrixhub-ai/matrixhub/api/go/v1alpha1"
+	"github.com/matrixhub-ai/matrixhub/internal/domain/authz"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/user"
 	"github.com/matrixhub-ai/matrixhub/internal/infra/log"
 )
 
 type UserHandler struct {
-	userRepo user.IUserRepo
+	userRepo     user.IUserRepo
+	authzService authz.IAuthzService
 }
 
 func (u *UserHandler) SetUserSysAdmin(ctx context.Context, request *userv1alpha1.SetUserSysAdminRequest) (*userv1alpha1.SetUserSysAdminResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Not implemented")
+	if err := request.ValidateAll(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if allowed, err := u.authzService.VerifyPlatformPermission(ctx, authz.UserAuthorize); err != nil || !allowed {
+		return nil, status.Error(codes.PermissionDenied, "permission denied")
+	}
+
+	userID := int(request.Id)
+	if err := u.userRepo.SetUserSysAdmin(ctx, userID, request.SysadminFlag); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &userv1alpha1.SetUserSysAdminResponse{}, nil
 }
 
 func (u *UserHandler) ResetUserPassword(ctx context.Context, request *userv1alpha1.ResetUserPasswordRequest) (*userv1alpha1.ResetUserPasswordResponse, error) {
@@ -123,9 +138,10 @@ func (u *UserHandler) RegisterToServer(options *ServerOptions) {
 	}
 }
 
-func NewUserHandler(repo user.IUserRepo) IHandler {
+func NewUserHandler(userRepo user.IUserRepo, authzService authz.IAuthzService) IHandler {
 	handler := &UserHandler{
-		userRepo: repo,
+		userRepo:     userRepo,
+		authzService: authzService,
 	}
 
 	return handler
