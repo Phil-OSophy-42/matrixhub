@@ -33,6 +33,8 @@ import (
 	"github.com/matrixhub-ai/hfd/pkg/permission"
 	"github.com/matrixhub-ai/hfd/pkg/receive"
 	"github.com/matrixhub-ai/hfd/pkg/repository"
+
+	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
 )
 
 const (
@@ -266,7 +268,7 @@ func (h *Handler) handleCommit(w http.ResponseWriter, r *http.Request) {
 	scanner.Buffer(make([]byte, 1024*1024), 100*1024*1024) // Allow up to 100MB lines
 
 	var header commitHeader
-	var ops []repository.CommitOperation
+	var ops []git.CommitOperation
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -304,8 +306,8 @@ func (h *Handler) handleCommit(w http.ResponseWriter, r *http.Request) {
 				content = decoded
 			}
 
-			ops = append(ops, repository.CommitOperation{
-				Type:    repository.CommitOperationAdd,
+			ops = append(ops, git.CommitOperation{
+				Type:    git.CommitOperationAdd,
 				Path:    file.Path,
 				Content: content,
 			})
@@ -319,8 +321,8 @@ func (h *Handler) handleCommit(w http.ResponseWriter, r *http.Request) {
 
 			// Create an LFS pointer content
 			pointerContent := fmt.Sprintf("version https://git-lfs.github.com/spec/v1\noid sha256:%s\nsize %d\n", lfsFile.OID, lfsFile.Size)
-			ops = append(ops, repository.CommitOperation{
-				Type:    repository.CommitOperationAdd,
+			ops = append(ops, git.CommitOperation{
+				Type:    git.CommitOperationAdd,
 				Path:    lfsFile.Path,
 				Content: []byte(pointerContent),
 			})
@@ -332,8 +334,8 @@ func (h *Handler) handleCommit(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			ops = append(ops, repository.CommitOperation{
-				Type: repository.CommitOperationDelete,
+			ops = append(ops, git.CommitOperation{
+				Type: git.CommitOperationDelete,
 				Path: deleted.Path,
 			})
 		}
@@ -382,8 +384,14 @@ func (h *Handler) handleCommit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	commit := &git.Commit{
+		Message:      message,
+		AuthorName:   user.User,
+		AuthorEmail:  user.Email,
+		ParentCommit: header.ParentCommit,
+	}
 
-	commitHash, err := repo.CreateCommit(r.Context(), rev, message, user.User, user.Email, ops, header.ParentCommit)
+	commitHash, err := h.modelService.CreateModelCommit(r.Context(), ri.Namespace, ri.Name, rev, commit, ops)
 	if err != nil {
 		responseJSON(w, fmt.Errorf("failed to create commit in repository %q: %v", ri.RepoName, err), http.StatusInternalServerError)
 		return

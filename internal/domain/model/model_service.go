@@ -21,6 +21,9 @@ import (
 	"strings"
 
 	"github.com/matrixhub-ai/matrixhub/internal/domain/git"
+	"github.com/matrixhub-ai/matrixhub/internal/domain/project"
+	"github.com/matrixhub-ai/matrixhub/internal/domain/registry"
+	"github.com/matrixhub-ai/matrixhub/internal/infra/log"
 )
 
 // IModelService defines the service interface for model operations.
@@ -39,26 +42,33 @@ type IModelService interface {
 	ListModelRevisions(ctx context.Context, project, name string) (*git.Revisions, error)
 	ListModelCommits(ctx context.Context, project, name, revision string, page, pageSize int) ([]*git.Commit, int64, error)
 	GetModelCommit(ctx context.Context, project, name, commitID string) (*git.Commit, error)
+	CreateModelCommit(ctx context.Context, project, name, revision string, commit *git.Commit, ops []git.CommitOperation) (string, error)
 	GetModelTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error)
 	GetModelBlob(ctx context.Context, project, name, revision, path string) (*git.TreeEntry, error)
 
 	// Metadata sync
 	SyncMetadata(ctx context.Context, project, name string) error
+
+	SyncFromRemote(ctx context.Context, project, name string) error
 }
 
 // ModelService implements the model service operations.
 type ModelService struct {
-	modelRepo IModelRepo
-	labelRepo ILabelRepo
-	gitRepo   git.IGitRepo
+	modelRepo    IModelRepo
+	labelRepo    ILabelRepo
+	gitRepo      git.IGitRepo
+	projectRepo  project.IProjectRepo
+	registryRepo registry.IRegistryRepo
 }
 
 // NewModelService creates a new ModelService instance.
-func NewModelService(modelRepo IModelRepo, labelRepo ILabelRepo, gitRepo git.IGitRepo) IModelService {
+func NewModelService(modelRepo IModelRepo, labelRepo ILabelRepo, gitRepo git.IGitRepo, projectRepo project.IProjectRepo, registryRepo registry.IRegistryRepo) IModelService {
 	return &ModelService{
-		modelRepo: modelRepo,
-		labelRepo: labelRepo,
-		gitRepo:   gitRepo,
+		modelRepo:    modelRepo,
+		labelRepo:    labelRepo,
+		gitRepo:      gitRepo,
+		projectRepo:  projectRepo,
+		registryRepo: registryRepo,
 	}
 }
 
@@ -216,6 +226,32 @@ func (s *ModelService) GetModelCommit(ctx context.Context, project, name, commit
 	return s.gitRepo.GetCommit(ctx, "models", project, name, commitID)
 }
 
+// CreateModel creates a new model in the system.
+func (s *ModelService) CreateModelCommit(ctx context.Context, project, name, revision string, commit *git.Commit, ops []git.CommitOperation) (string, error) {
+	if project == "" {
+		return "", errors.New("invalid project")
+	}
+	if name == "" {
+		return "", errors.New("invalid name")
+	}
+
+	// Check if model exists
+	_, err := s.modelRepo.GetByProjectAndName(ctx, project, name)
+	if err != nil {
+		return "", errors.New("model not exists")
+	}
+
+	commitHash, err := s.gitRepo.CreateCommit(ctx, "models", project, name, revision, commit, ops)
+	if err != nil {
+		return "", err
+	}
+	if err = s.SyncMetadata(ctx, project, name); err != nil {
+		log.Errorf("failed to sync metadata for %s/%s: %v", project, name, err)
+	}
+
+	return commitHash, nil
+}
+
 // GetModelTree returns the file tree at a specific revision and path.
 func (s *ModelService) GetModelTree(ctx context.Context, project, name, revision, path string) ([]*git.TreeEntry, error) {
 	if project == "" {
@@ -296,4 +332,45 @@ func (s *ModelService) updateModelLabels(ctx context.Context, modelID int64, tag
 	}
 
 	return s.labelRepo.UpdateModelLabels(ctx, modelID, labelIDs)
+}
+
+func (s *ModelService) SyncFromRemote(ctx context.Context, project, name string) error {
+	prj, err := s.projectRepo.GetProjectByName(ctx, project)
+	if err == nil {
+		if prj.HasProxy() {
+			reg, err := s.registryRepo.GetRegistry(ctx, *prj.RegistryID)
+			if err != nil {
+				return fmt.Errorf("get registry(id=%d): %w", prj.RegistryID, err)
+			}
+			gr := &git.GitRepository{
+				RemoteRegistryURL:  reg.URL,
+				RemoteProjectName:  prj.Organization,
+				RemoteResourceName: name,
+				ProjectName:        project,
+				ResourceName:       name,
+				ResourceType:       "model",
+			}
+			mod, _ := s.modelRepo.GetByProjectAndName(ctx, project, name)
+			if mod == nil {
+				mod = &Model{
+					Name:        name,
+					ProjectID:   prj.ID,
+					ProjectName: project,
+				}
+				if _, err = s.modelRepo.Create(ctx, mod); err != nil {
+					return err
+				}
+			} else if !mod.ShouldSync() {
+				return nil
+			}
+			if err = s.gitRepo.PullFromRemote(ctx, gr); err != nil {
+				return err
+			}
+			if err = s.SyncMetadata(ctx, mod.ProjectName, mod.Name); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

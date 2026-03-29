@@ -32,6 +32,22 @@ type Revisions struct {
 	Tags     []*Revision `json:"tags"`
 }
 
+type CommitOperationType string
+
+const (
+	// CommitOperationAdd adds or updates a file.
+	CommitOperationAdd CommitOperationType = "add"
+	// CommitOperationDelete deletes a file.
+	CommitOperationDelete CommitOperationType = "delete"
+)
+
+// CommitOperation represents a single operation in a commit.
+type CommitOperation struct {
+	Type    CommitOperationType
+	Path    string
+	Content []byte // file content for add operations
+}
+
 // Commit represents a Git commit.
 type Commit struct {
 	ID             string    `json:"id"`
@@ -43,6 +59,7 @@ type Commit struct {
 	CommitterEmail string    `json:"committerEmail"`
 	CommitterDate  time.Time `json:"committerDate"`
 	Diff           string    `json:"diff"`
+	ParentCommit   string
 	CreatedAt      time.Time `json:"createdAt"`
 }
 
@@ -114,6 +131,10 @@ type IGitRepo interface {
 	// repoType: "models" or "datasets"
 	GetCommit(ctx context.Context, repoType, project, name, commitID string) (*Commit, error)
 
+	// CreateCommit returns a specific commit by ID.
+	// repoType: "models" or "datasets"
+	CreateCommit(ctx context.Context, repoType, project, name, revision string, commit *Commit, ops []CommitOperation) (string, error)
+
 	// GetTree returns the file tree at a specific revision and path.
 	// repoType: "models" or "datasets"
 	GetTree(ctx context.Context, repoType, project, name, revision, path string) ([]*TreeEntry, error)
@@ -122,9 +143,9 @@ type IGitRepo interface {
 	// repoType: "models" or "datasets"
 	GetBlob(ctx context.Context, repoType, project, name, revision, path string) (*TreeEntry, error)
 
-	Clone(ctx context.Context, gitRepository *GitRepository) error
+	CloneFromRemote(ctx context.Context, gitRepository *GitRepository) error
 
-	Pull(ctx context.Context, gitRepository *GitRepository) error
+	PullFromRemote(ctx context.Context, gitRepository *GitRepository) error
 
 	// ExtractMetadata reads metadata-related raw files from a Git repository.
 	// repoType: "models" or "datasets"

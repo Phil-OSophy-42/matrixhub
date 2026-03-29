@@ -87,6 +87,26 @@ func resolveRef(repo *repository.Repository, rev string) string {
 	return rev
 }
 
+// convertCommitOperations converts domain CommitOperation slice to repository CommitOperation slice.
+func convertCommitOperations(ops []git.CommitOperation) []repository.CommitOperation {
+	result := make([]repository.CommitOperation, len(ops))
+	for i, op := range ops {
+		var typ repository.CommitOperationType
+		switch op.Type {
+		case git.CommitOperationAdd:
+			typ = repository.CommitOperationAdd
+		case git.CommitOperationDelete:
+			typ = repository.CommitOperationDelete
+		}
+		result[i] = repository.CommitOperation{
+			Type:    typ,
+			Path:    op.Path,
+			Content: op.Content,
+		}
+	}
+	return result
+}
+
 func isCommitSHA(s string) bool {
 	if len(s) != 40 {
 		return false
@@ -268,6 +288,22 @@ func (g *gitRepo) GetCommit(ctx context.Context, repoType, project, name, commit
 	}, nil
 }
 
+func (g *gitRepo) CreateCommit(ctx context.Context, repoType, project, name, revision string, commit *git.Commit, ops []git.CommitOperation) (string, error) {
+	gitPath := g.gitPath(repoType, project, name)
+	if !repository.IsRepository(gitPath) {
+		return "", fmt.Errorf("repository does not exist at %s", gitPath)
+	}
+	repo, err := repository.Open(gitPath)
+	if err != nil {
+		return "", err
+	}
+	commitHash, err := repo.CreateCommit(ctx, revision, commit.Message, commit.AuthorName, commit.AuthorEmail, convertCommitOperations(ops), commit.ParentCommit)
+	if err != nil {
+		return "", err
+	}
+	return commitHash, nil
+}
+
 // GetTree returns the file tree at a specific revision and path
 func (g *gitRepo) GetTree(ctx context.Context, repoType, project, name, revision, path string) ([]*git.TreeEntry, error) {
 	gitPath := g.gitPath(repoType, project, name)
@@ -416,7 +452,7 @@ func (g *gitRepo) GetBlob(ctx context.Context, repoType, project, name, revision
 	}, nil
 }
 
-func (g *gitRepo) Clone(ctx context.Context, gitRepository *git.GitRepository) error {
+func (g *gitRepo) CloneFromRemote(ctx context.Context, gitRepository *git.GitRepository) error {
 	gitPath := g.gitPath(gitRepository.ResourceType, gitRepository.ProjectName, gitRepository.ResourceName)
 	if repository.IsRepository(gitPath) {
 		return fmt.Errorf("repository already exists")
@@ -431,13 +467,16 @@ func (g *gitRepo) Clone(ctx context.Context, gitRepository *git.GitRepository) e
 	return g.mirror.Sync(ctx, gitPath, repoName, mirror.WithSyncMirrorSourceURL(sourceURL))
 }
 
-func (g *gitRepo) Pull(ctx context.Context, gitRepository *git.GitRepository) error {
+func (g *gitRepo) PullFromRemote(ctx context.Context, gitRepository *git.GitRepository) error {
 	gitPath := g.gitPath(gitRepository.ResourceType, gitRepository.ProjectName, gitRepository.ResourceName)
-	if !repository.IsRepository(gitPath) {
-		return fmt.Errorf("repository does not exist")
-	}
 	repoName := repoPrefix(gitRepository.ResourceType) + gitRepository.ProjectName + "/" + gitRepository.ResourceName
 	sourceURL := strings.TrimSuffix(gitRepository.RemoteRegistryURL, "/") + "/" + repoName
+	if !repository.IsRepository(gitPath) {
+		_, err := repository.InitMirror(ctx, gitPath, sourceURL)
+		if err != nil {
+			return err
+		}
+	}
 	return g.mirror.Sync(ctx, gitPath, repoName, mirror.WithSyncMirrorSourceURL(sourceURL))
 }
 
