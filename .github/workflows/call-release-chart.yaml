@@ -145,19 +145,24 @@ jobs:
           chart_file=$(ls charts/*.tgz)
           echo "Chart file: ${chart_file}"
 
-          # Push to ghcr.io as OCI artifact
-          helm push "${chart_file}" oci://ghcr.io/${{ github.repository_owner }}
+          # Convert repository owner to lowercase for OCI registry
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "Repository owner (lowercase): ${REPO_OWNER}"
 
-          echo "Chart pushed to: oci://ghcr.io/${{ github.repository_owner }}/${{ env.CHART_NAME }}:${{ needs.get-ref.outputs.chart-version }}"
+          # Push to ghcr.io as OCI artifact
+          helm push "${chart_file}" oci://ghcr.io/${REPO_OWNER}
+
+          echo "Chart pushed to: oci://ghcr.io/${REPO_OWNER}/${{ env.CHART_NAME }}:${{ needs.get-ref.outputs.chart-version }}"
           echo ""
           echo "To install this chart, run:"
-          echo "  helm repo add matrixhub oci://ghcr.io/${{ github.repository_owner }}"
+          echo "  helm repo add matrixhub oci://ghcr.io/${REPO_OWNER}"
           echo "  helm install matrixhub matrixhub/${{ env.CHART_NAME }} --version ${{ needs.get-ref.outputs.chart-version }}"
 
       - name: Verify OCI Push
         run: |
           echo "Verifying chart is available in OCI registry..."
-          helm pull oci://ghcr.io/${{ github.repository_owner }}/${{ env.CHART_NAME }} --version ${{ needs.get-ref.outputs.chart-version }} --destination /tmp/verify
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          helm pull oci://ghcr.io/${REPO_OWNER}/${{ env.CHART_NAME }} --version ${{ needs.get-ref.outputs.chart-version }} --destination /tmp/verify
           ls -la /tmp/verify/
           echo "Verification successful!"
 
