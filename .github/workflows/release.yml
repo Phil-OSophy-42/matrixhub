@@ -1,33 +1,87 @@
-name: Release image
+name: Release
+
+# This workflow is triggered by tag push:
+# 1. Builds and pushes container images to ghcr.io
+# 2. Packages Helm chart and pushes to ghcr.io (OCI) and GitHub Pages
 
 on:
   workflow_dispatch:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-dev[0-9]+'
 
-permissions:
-  contents: read
-  packages: write
+permissions: write-all
 
 jobs:
-  build-and-push:
+  get-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ env.RUN_TAG }}
+      is-official-release: ${{ env.IS_OFFICIAL_RELEASE }}
+    steps:
+      - name: Get Tag
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Called by workflow_dispatch"
+            echo "RUN_TAG=${{ github.event.inputs.tag || 'v0.0.1' }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            echo "Called by push tag"
+            echo "RUN_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          else
+            echo "Unexpected event: ${{ github.event_name }}"
+            exit 1
+          fi
+          echo "Tag: ${RUN_TAG}"
+
+          # Check if this is an official release (vX.Y.Z without -rc or -dev suffix)
+          if [[ "${RUN_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "IS_OFFICIAL_RELEASE=true" >> $GITHUB_ENV
+          else
+            echo "IS_OFFICIAL_RELEASE=false" >> $GITHUB_ENV
+          fi
+          echo "Is official release: ${IS_OFFICIAL_RELEASE}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RUN_TAG }}
+
+  build-and-push-image:
+    needs: get-tag
+    uses: ./.github/workflows/call-release-image.yaml
+    with:
+      ref: ${{ needs.get-tag.outputs.tag }}
+    secrets: inherit
+
+  release-chart:
+    needs: [get-tag, build-and-push-image]
+    uses: ./.github/workflows/call-release-chart.yaml
+    with:
+      ref: ${{ needs.get-tag.outputs.tag }}
+      submit: true
+    secrets: inherit
+
+  create-release:
+    needs: [get-tag, release-chart]
+    if: needs.get-tag.outputs.is-official-release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      - name: Download Chart Artifact
+        uses: actions/download-artifact@v4.2.1
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          name: chart_package_artifact_${{ needs.get-tag.outputs.tag }}
+          path: chart-package/
 
-      - name: Push release images
-        run: make image-push
+      - name: Create Release
+        uses: ncipollo/release-action@v1.15.0
+        with:
+          artifacts: "chart-package/*"
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.get-tag.outputs.tag }}
+          name: "Release ${{ needs.get-tag.outputs.tag }}"
+          generateReleaseNotes: true
