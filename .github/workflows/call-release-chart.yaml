@@ -162,6 +162,7 @@ jobs:
         run: |
           echo "Verifying chart is available in OCI registry..."
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          mkdir -p /tmp/verify
           helm pull oci://ghcr.io/${REPO_OWNER}/${{ env.CHART_NAME }} --version ${{ needs.get-ref.outputs.chart-version }} --destination /tmp/verify
           ls -la /tmp/verify/
           echo "Verification successful!"
