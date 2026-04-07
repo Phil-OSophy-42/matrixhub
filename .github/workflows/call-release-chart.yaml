@@ -182,7 +182,8 @@ jobs:
         run: |
           name=${{ github.repository }}
           proj=${name#*/}
-          url=https://${{ github.repository_owner }}.github.io/${proj}
+          owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          url=https://${owner}.github.io/${proj}
           echo "URL=${url}" >> $GITHUB_ENV
 
       - name: Checkout GitHub Pages Branch
