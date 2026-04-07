@@ -186,22 +186,28 @@ jobs:
           url=https://${owner}.github.io/${proj}
           echo "URL=${url}" >> $GITHUB_ENV
 
-      - name: Checkout GitHub Pages Branch
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
+          fetch-depth: 0
           persist-credentials: "true"
-        continue-on-error: true
 
-      - name: Initialize GitHub Pages
-        if: failure()
+      - name: Setup GitHub Pages Branch
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          git checkout --orphan gh-pages
-          git rm -rf . || true
-          git commit --allow-empty -m "Initialize gh-pages"
-          git push origin gh-pages --force
+
+          # Check if gh-pages branch exists
+          if git ls-remote --heads origin gh-pages | grep -q .; then
+            echo "gh-pages branch exists, checking out..."
+            git checkout gh-pages
+          else
+            echo "gh-pages branch does not exist, creating..."
+            git checkout --orphan gh-pages
+            git rm -rf . || true
+            git commit --allow-empty -m "Initialize gh-pages"
+            git push origin gh-pages
+          fi
 
       - name: Download Artifact
         uses: actions/download-artifact@v4.2.1
