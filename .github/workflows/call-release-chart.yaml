@@ -162,17 +162,20 @@ jobs:
         run: |
           echo "Verifying chart is available in OCI registry..."
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          mkdir -p /tmp/verify
+          mkdir -p /tmp/verify 
           helm pull oci://ghcr.io/${REPO_OWNER}/${{ env.CHART_NAME }} --version ${{ needs.get-ref.outputs.chart-version }} --destination /tmp/verify
           ls -la /tmp/verify/
           echo "Verification successful!"
 
   # Optional: Also update GitHub Pages for traditional helm repo
-  # Set enabled=false to skip GitHub Pages (only use OCI)
   update-github-pages:
     runs-on: ubuntu-latest
     needs: [get-ref, package-chart]
-    if: false  # disabled by default, set to 'needs.get-ref.outputs.submit == "true"' to enable
+    if: ${{ needs.get-ref.outputs.submit == 'true' }}
+    permissions:
+      pages: write
+      id-token: write
+      contents: write
     steps:
       - name: Get Base Chart URL
         id: get_base_url
