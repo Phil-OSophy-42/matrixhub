@@ -36,28 +36,31 @@ jobs:
   get-ref:
     runs-on: ubuntu-latest
     outputs:
-      ref: ${{ env.REF }}
-      submit: ${{ env.SUBMIT }}
-      chart-version: ${{ env.CHART_VERSION }}
+      ref: ${{ steps.get_ref.outputs.ref }}
+      submit: ${{ steps.get_ref.outputs.submit }}
+      chart-version: ${{ steps.get_ref.outputs.chart-version }}
     steps:
       - name: Get Ref
         id: get_ref
         run: |
           if [ "${{ inputs.ref }}" != "" ]; then
             echo "Called by workflow_call"
-            echo "REF=${{ inputs.ref }}" >> $GITHUB_ENV
-            echo "SUBMIT=${{ inputs.submit }}" >> $GITHUB_ENV
+            REF="${{ inputs.ref }}"
+            SUBMIT="${{ inputs.submit }}"
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "Called by workflow_dispatch"
-            echo "REF=${{ inputs.ref }}" >> $GITHUB_ENV
-            echo "SUBMIT=true" >> $GITHUB_ENV
+            REF="${{ inputs.ref }}"
+            SUBMIT="true"
           else
             echo "Unexpected event: ${{ github.event_name }}"
             exit 1
           fi
           # Extract chart version (remove 'v' prefix)
-          CHART_VERSION=$(echo "${{ inputs.ref }}" | sed 's/^v//')
-          echo "CHART_VERSION=${CHART_VERSION}" >> $GITHUB_ENV
+          CHART_VERSION=$(echo "${REF}" | sed 's/^v//')
+          echo "ref=${REF}" >> $GITHUB_OUTPUT
+          echo "submit=${SUBMIT}" >> $GITHUB_OUTPUT
+          echo "chart-version=${CHART_VERSION}" >> $GITHUB_OUTPUT
+          echo "Ref: ${REF}"
           echo "Chart version: ${CHART_VERSION}"
 
   package-chart:
