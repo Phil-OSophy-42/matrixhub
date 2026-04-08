@@ -95,7 +95,7 @@ jobs:
           echo "Updated Chart.yaml:"
           cat matrixhub/Chart.yaml
           echo "Updated values.yaml (image section):"
-          grep -A5 "image:" -A10 "tag:" matrixhub/values.yaml
+          grep -A5 "image:" matrixhub/values.yaml | head -20
 
       - name: Lint Chart
         run: |
