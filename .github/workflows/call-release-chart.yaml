@@ -81,17 +81,21 @@ jobs:
         run: |
           cd deploy/charts
           chart_version="${{ needs.get-ref.outputs.chart-version }}"
+          image_ref="${{ needs.get-ref.outputs.ref }}"
           echo "Updating chart version to: ${chart_version}"
+          echo "Image ref: ${image_ref}"
 
           # Update version in Chart.yaml
           sed -i "s/^version:.*/version: ${chart_version}/" matrixhub/Chart.yaml
           sed -i "s/^appVersion:.*/appVersion: \"${chart_version}\"/" matrixhub/Chart.yaml
 
           # Update image tag in values.yaml
-          sed -i 's|tag: ""|tag: ${{ needs.get-ref.outputs.ref }}|' matrixhub/values.yaml
+          sed -i "s|tag: \"\"|tag: ${image_ref}|" matrixhub/values.yaml
 
           echo "Updated Chart.yaml:"
           cat matrixhub/Chart.yaml
+          echo "Updated values.yaml (image section):"
+          grep -A5 "image:" -A10 "tag:" matrixhub/values.yaml
 
       - name: Lint Chart
         run: |
