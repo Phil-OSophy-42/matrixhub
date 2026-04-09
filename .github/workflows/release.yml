@@ -13,9 +13,9 @@ on:
         default: v1.0.0
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-dev[0-9]+'
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*-rc[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*-dev[0-9]*'
 
 permissions: write-all
 
@@ -69,8 +69,15 @@ jobs:
       submit: true
     secrets: inherit
 
+  release-changelog:
+    needs: [build-and-push-image, get-tag]
+    uses: ./.github/workflows/call-release-changelog.yaml
+    with:
+      dest_tag: ${{ needs.get-tag.outputs.tag }}
+    secrets: inherit
+
   create-release:
-    needs: [get-tag, release-chart]
+    needs: [release-chart, release-changelog, get-tag]
     if: needs.get-tag.outputs.is-official-release == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -80,13 +87,41 @@ jobs:
           name: chart_package_artifact_${{ needs.get-tag.outputs.tag }}
           path: chart-package/
 
+      - name: Download Changelog Artifact
+        uses: actions/download-artifact@v4.2.1
+        with:
+          name: changelog_artifact_${{ needs.get-tag.outputs.tag }}
+          path: changelog-result/
+
+      - name: Get Downloaded Files
+        id: download_file
+        run: |
+          # ========= chart
+          if ! ls chart-package/*.tgz &>/dev/null ; then
+              echo "error, failed to find any chart "
+              exit 1
+          fi
+          chart_path=$( ls chart-package/*.tgz )
+          echo "chart_path=${chart_path}" >> $GITHUB_ENV
+          # ========== changelog
+          if ! ls changelog-result/*.md &>/dev/null ; then
+              echo "error, failed to find changelog "
+              exit 2
+          fi
+          ls changelog-result/
+          cat changelog-result/*.md
+          changelog_file=$( ls changelog-result/ )
+          changelog_path=./changelog-result/${changelog_file}
+          echo "changelog_path=${changelog_path}" >> $GITHUB_ENV
+          cp ./changelog-result/${changelog_file} ./changelog-result/changelog.md
+
       - name: Create Release
         uses: ncipollo/release-action@v1.15.0
         with:
           artifacts: "chart-package/*"
           allowUpdates: true
           artifactErrorsFailBuild: true
+          bodyFile: "./changelog-result/changelog.md"
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.get-tag.outputs.tag }}
           name: "Release ${{ needs.get-tag.outputs.tag }}"
-          generateReleaseNotes: true
