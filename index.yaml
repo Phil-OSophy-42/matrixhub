@@ -2,8 +2,19 @@ apiVersion: v1
 entries:
   matrixhub:
   - apiVersion: v2
+    appVersion: 0.0.5
+    created: "2026-04-10T09:06:25.50998679Z"
+    description: A Helm chart for MatrixHub API Server
+    digest: 99496fab0136e662d05774c446bd38e59010371a1e799be3f94929c46442a13e
+    home: https://github.com/matrixhub-ai/matrixhub
+    name: matrixhub
+    type: application
+    urls:
+    - https://phil-osophy-42.github.io/matrixhub/charts/matrixhub-0.0.5.tgz
+    version: 0.0.5
+  - apiVersion: v2
     appVersion: 0.0.4
-    created: "2026-04-10T02:21:28.860049106Z"
+    created: "2026-04-10T09:06:25.509443Z"
     description: A Helm chart for MatrixHub API Server
     digest: 88c9d7a6b0a47f3a08980ac0e1655eddb63e5e3f2f2f22b2e243b0089b46d965
     home: https://github.com/matrixhub-ai/matrixhub
@@ -14,7 +25,7 @@ entries:
     version: 0.0.4
   - apiVersion: v2
     appVersion: 0.0.3
-    created: "2026-04-10T02:21:28.859656725Z"
+    created: "2026-04-10T09:06:25.509042793Z"
     description: A Helm chart for MatrixHub API Server
     digest: b4bea2bdc372389e94f94d1a535d0a4478696ae57b7569707ef9939867cecaa4
     home: https://github.com/matrixhub-ai/matrixhub
@@ -25,7 +36,7 @@ entries:
     version: 0.0.3
   - apiVersion: v2
     appVersion: 0.0.2
-    created: "2026-04-10T02:21:28.859204391Z"
+    created: "2026-04-10T09:06:25.508661855Z"
     description: A Helm chart for MatrixHub API Server
     digest: 74a84f3c4271c77b63debc20deea273fee94963ddcddcfd329d803a17c07e14c
     home: https://github.com/matrixhub-ai/matrixhub
@@ -36,7 +47,7 @@ entries:
     version: 0.0.2
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2026-04-10T02:21:28.858600656Z"
+    created: "2026-04-10T09:06:25.508211345Z"
     description: A Helm chart for MatrixHub API Server
     digest: de8760e44f42c3eb7218a78042639fe4e0ff632778e0b8fb9f47ed5c761bd663
     home: https://github.com/matrixhub-ai/matrixhub
@@ -47,7 +58,7 @@ entries:
     version: 0.0.1
   - apiVersion: v2
     appVersion: 0.0.1-dev0
-    created: "2026-04-10T02:21:28.857341296Z"
+    created: "2026-04-10T09:06:25.507813483Z"
     description: A Helm chart for MatrixHub API Server
     digest: aed601aee047100ae438b4b6ea9aed5434604002402d7323975b31e66266a332
     home: https://github.com/matrixhub-ai/matrixhub
@@ -56,4 +67,4 @@ entries:
     urls:
     - https://phil-osophy-42.github.io/matrixhub/charts/matrixhub-0.0.1-dev0.tgz
     version: 0.0.1-dev0
-generated: "2026-04-10T02:21:28.856328938Z"
+generated: "2026-04-10T09:06:25.507193156Z"
