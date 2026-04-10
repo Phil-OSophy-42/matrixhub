@@ -2,8 +2,19 @@ apiVersion: v1
 entries:
   matrixhub:
   - apiVersion: v2
+    appVersion: 0.0.4
+    created: "2026-04-10T00:57:48.147678906Z"
+    description: A Helm chart for MatrixHub API Server
+    digest: 2cd3ad0e3178a861f065466d5d9f961cce3d9b34636858d759e09df1c87f52d0
+    home: https://github.com/matrixhub-ai/matrixhub
+    name: matrixhub
+    type: application
+    urls:
+    - https://phil-osophy-42.github.io/matrixhub/charts/matrixhub-0.0.4.tgz
+    version: 0.0.4
+  - apiVersion: v2
     appVersion: 0.0.3
-    created: "2026-04-10T00:53:31.325701731Z"
+    created: "2026-04-10T00:57:48.147256915Z"
     description: A Helm chart for MatrixHub API Server
     digest: b4bea2bdc372389e94f94d1a535d0a4478696ae57b7569707ef9939867cecaa4
     home: https://github.com/matrixhub-ai/matrixhub
@@ -14,7 +25,7 @@ entries:
     version: 0.0.3
   - apiVersion: v2
     appVersion: 0.0.2
-    created: "2026-04-10T00:53:31.325284923Z"
+    created: "2026-04-10T00:57:48.146874208Z"
     description: A Helm chart for MatrixHub API Server
     digest: 74a84f3c4271c77b63debc20deea273fee94963ddcddcfd329d803a17c07e14c
     home: https://github.com/matrixhub-ai/matrixhub
@@ -25,7 +36,7 @@ entries:
     version: 0.0.2
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2026-04-10T00:53:31.324724859Z"
+    created: "2026-04-10T00:57:48.146444372Z"
     description: A Helm chart for MatrixHub API Server
     digest: de8760e44f42c3eb7218a78042639fe4e0ff632778e0b8fb9f47ed5c761bd663
     home: https://github.com/matrixhub-ai/matrixhub
@@ -36,7 +47,7 @@ entries:
     version: 0.0.1
   - apiVersion: v2
     appVersion: 0.0.1-dev0
-    created: "2026-04-10T00:53:31.3243285Z"
+    created: "2026-04-10T00:57:48.146028642Z"
     description: A Helm chart for MatrixHub API Server
     digest: aed601aee047100ae438b4b6ea9aed5434604002402d7323975b31e66266a332
     home: https://github.com/matrixhub-ai/matrixhub
@@ -45,4 +56,4 @@ entries:
     urls:
     - https://phil-osophy-42.github.io/matrixhub/charts/matrixhub-0.0.1-dev0.tgz
     version: 0.0.1-dev0
-generated: "2026-04-10T00:53:31.323726628Z"
+generated: "2026-04-10T00:57:48.145380467Z"
