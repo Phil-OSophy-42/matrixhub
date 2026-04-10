@@ -39,94 +39,38 @@ echo "generate changelog to directory ${OUTPUT_DIR}"
 cd ${PROJECT_ROOT_PATH}
 
 #============================
-echo "-------------- generate latest release version tag --------------"
-LATEST_RELEASE_VERISON=$(curl --retry 10 -s "https://api.github.com/repos/${PROJECT_REPO}/releases" | grep '"tag_name":' | grep -Eo "v([0-9]+\.[0-9]+\.[0-9])" | sort -r | head -n 1 || true)
-LATEST_RELEASE_VERISON=` grep -oE "[0-9]+\.[0-9]+\.[0-9]+" <<< "${LATEST_RELEASE_VERISON}" ` || true
-if [ -z "${LATEST_RELEASE_VERISON}" ] ; then
-    LATEST_X=0
-    LATEST_Y=0
-    LATEST_Z=0
-else
-    LATEST_X=${LATEST_RELEASE_VERISON%%.*}
-    TMP=${LATEST_RELEASE_VERISON%.*}
-    LATEST_Y=${TMP#*.}
-    LATEST_Z=${LATEST_RELEASE_VERISON##*.}
-fi
-
-#============================
-ORIGIN_START_TAG=${START_TAG}
+# Find the previous tag for changelog range
+# If START_TAG is not provided, find the previous official version tag from git
 if [ -z "${START_TAG}" ] ; then
-    echo "-------------- generate start tag"
-    VERSION=` grep -oE "[0-9]+\.[0-9]+\.[0-9]+" <<< "${DEST_TAG}" `
-    V_X=${VERSION%%.*}
-    TMP=${VERSION%.*}
-    V_Y=${TMP#*.}
-    V_Z=${VERSION##*.}
-    RC=` sed -E 's?[vV]*[0-9]+\.[0-9]+\.[0-9]+[^0-9]*??' <<<  "${DEST_TAG}" `
-    #---------
-    START_X=""
-    START_Y=""
-    START_Z=""
-    START_RC=""
-    #--------
-    SET_VERSION() {
-      if (( V_Z == 0 )); then
-        if (( V_Y == 0 )); then
-          if (( V_X > 0 )); then
-            START_X=$(( V_X - 1 ))
-            START_Y=$LATEST_Y
-            START_Z=$LATEST_Z
-          else
-            echo "error, $DEST_TAG, all 0"
-            exit 0
-          fi
-        else
-          START_X=$V_X
-          START_Y=$(( V_Y - 1 ))
-          START_Z=0
-        fi
-      else
-        START_X=$V_X
-        START_Y=$V_Y
-        START_Z=$(( V_Z - 1 ))
-      fi
-    }
-
-    TMP_DEST_TAG=$DEST_TAG
-    if [ -z "${RC}" ] ;then
-      SET_VERSION
+    echo "-------------- find previous tag"
+    # List all official version tags sorted by version, find the one just before DEST_TAG
+    PREV_TAG=$(git tag --sort=version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -B1 "^${DEST_TAG}$" | head -1)
+    if [ "$PREV_TAG" = "$DEST_TAG" ] || [ -z "$PREV_TAG" ]; then
+        # No previous tag, this is the first release
+        START_TAG=""
+        echo "No previous tag found, this is the first release"
     else
-      if (( RC == 0 )) ;then
-        SET_VERSION
-        # remove rc
-        TMP_DEST_TAG=` grep -oE "[vV]*[0-9]+\.[0-9]+\.[0-9]+" <<< "${DEST_TAG}" `
-        RC=""
-      else
-        START_X=$V_X
-        START_Y=$V_Y
-        START_Z=$V_Z
-        START_RC=$(( RC - 1 ))
-      fi
-    fi
-    #------ result
-    START_TAG=` sed -E "s?[0-9]+\.[0-9]+\.[0-9]+?${START_X}.${START_Y}.${START_Z}?" <<<  "${TMP_DEST_TAG}" `
-    if [ -n "${RC}" ] ; then
-      START_TAG=` sed -E "s?([vV]*[0-9]+\.[0-9]+\.[0-9]+[^0-9]*[^0-9]*)[0-9]+?\1${START_RC}?" <<<  "${START_TAG}" `
+        START_TAG="$PREV_TAG"
+        echo "Previous tag: ${START_TAG}"
     fi
 fi
+
+# Use v0.0.0 as display name for first release (for filename and content)
+DISPLAY_START_TAG="${START_TAG:-v0.0.0}"
 
 echo "-------------- check tags "
 echo "DEST_TAG=${DEST_TAG}"
-echo "START_TAG=${START_TAG}"
+echo "START_TAG=${DISPLAY_START_TAG}"
 
-# check whether tag START_TAG  exists
+# Get commits in range
 ALL_COMMIT=""
-if [ -z "${ORIGIN_START_TAG}" ] && (( START_X == 0 )) && (( START_Y == 0 )) && (( START_Z == 0 )); then
-	ALL_COMMIT=`git log ${DEST_TAG} --reverse --oneline | awk '{print $1}' | tr '\n'  ' ' ` \
-		|| { echo "error, failed to get PR for tag ${DEST_TAG} " ; exit 1 ; }
+if [ -z "${START_TAG}" ]; then
+    # First release: all commits up to DEST_TAG
+    ALL_COMMIT=$(git log ${DEST_TAG} --reverse --oneline | awk '{print $1}' | tr '\n' ' ') \
+        || { echo "error, failed to get commits for tag ${DEST_TAG}" ; exit 1 ; }
 else
-	ALL_COMMIT=`git log ${START_TAG}..${DEST_TAG} --reverse  --oneline | awk '{print $1}' | tr '\n'  ' ' ` \
-		|| { echo "error, failed to get PR for tag ${DEST_TAG} " ; exit 1 ; }
+    ALL_COMMIT=$(git log ${START_TAG}..${DEST_TAG} --reverse --oneline | awk '{print $1}' | tr '\n' ' ') \
+        || { echo "error, failed to get commits for range ${START_TAG}..${DEST_TAG}" ; exit 1 ; }
 fi
 echo "ALL_COMMIT: ${ALL_COMMIT}"
 
@@ -168,11 +112,11 @@ for COMMIT in ${ALL_COMMIT} ; do
 done
 #---------------------
 echo "generate changelog md"
-FILE_CHANGELOG="${OUTPUT_DIR}/changelog_from_${START_TAG}_to_${DEST_TAG}.md"
+FILE_CHANGELOG="${OUTPUT_DIR}/changelog_from_${DISPLAY_START_TAG}_to_${DEST_TAG}.md"
 echo > ${FILE_CHANGELOG}
 echo "# ${DEST_TAG}" >> ${FILE_CHANGELOG}
 echo "Welcome to the ${DEST_TAG} release of MatrixHub!" >> ${FILE_CHANGELOG}
-echo "Compared with version:${START_TAG}, version:${DEST_TAG} has the following updates." >> ${FILE_CHANGELOG}
+echo "Compared with version:${DISPLAY_START_TAG}, version:${DEST_TAG} has the following updates." >> ${FILE_CHANGELOG}
 echo "" >> ${FILE_CHANGELOG}
 echo "***" >> ${FILE_CHANGELOG}
 echo "" >> ${FILE_CHANGELOG}
@@ -214,6 +158,10 @@ echo "## Total " >> ${FILE_CHANGELOG}
 echo "" >> ${FILE_CHANGELOG}
 echo "Pull request number: ${TOTAL_COUNT}" >> ${FILE_CHANGELOG}
 echo "" >> ${FILE_CHANGELOG}
-echo "[ Commits ](https://github.com/${PROJECT_REPO}/compare/${START_TAG}...${DEST_TAG})" >> ${FILE_CHANGELOG}
+if [ -n "${START_TAG}" ]; then
+    echo "[ Commits ](https://github.com/${PROJECT_REPO}/compare/${START_TAG}...${DEST_TAG})" >> ${FILE_CHANGELOG}
+else
+    echo "[ Commits ](https://github.com/${PROJECT_REPO}/commits/${DEST_TAG})" >> ${FILE_CHANGELOG}
+fi
 echo "--------------------"
 echo "generate changelog to ${FILE_CHANGELOG}"
