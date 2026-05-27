@@ -94,7 +94,9 @@ jobs:
       - name: Pull chart and deploy
         run: |
           VERSION="${{ needs.compute-version.outputs.version }}"
-          CHART_REF="${CHART_REGISTRY:-oci://ghcr.m.daocloud.io/matrixhub-ai}/${{ env.CHART_NAME }}"
+          # Runner pod has outbound internet; pull chart directly from ghcr.io
+          # (the daocloud mirror does NOT proxy OCI auth properly)
+          CHART_REF="${CHART_REGISTRY:-oci://ghcr.io/matrixhub-ai}/${{ env.CHART_NAME }}"
           VALUES_FILE="${VALUES_FILE:-/etc/matrixhub/values-internal.yaml}"
           NAMESPACE="${DEPLOY_NAMESPACE:-matrixhub}"
 
