@@ -113,6 +113,13 @@ spec:
               value: "/home/runner/_work"
             - name: DISABLE_AUTO_UPDATE
               value: "true"
+            # Chart registry — runner pod has outbound internet (it talks to github.com),
+            # so pull chart directly from ghcr.io. Override per-fork as needed.
+            - name: CHART_REGISTRY
+              value: "oci://ghcr.io/matrixhub-ai"
+            # Target namespace for helm upgrade
+            - name: DEPLOY_NAMESPACE
+              value: "matrixhub"
           volumeMounts:
             - name: values
               mountPath: /etc/matrixhub
