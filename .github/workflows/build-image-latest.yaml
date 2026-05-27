@@ -32,12 +32,14 @@ jobs:
           echo "Version: ${VERSION}"
 
   # Job 1: Build and push image to ghcr.io
+  # Image tag uses 'v' prefix (e.g. v0.0.1-d3e4b1b) to distinguish from chart tag,
+  # since both live in the same OCI repo path (ghcr.io/<owner>/matrixhub).
   build-image:
     needs: compute-version
     uses: ./.github/workflows/call-release-image.yaml
     with:
       ref: 'main'
-      tagoverride: ${{ needs.compute-version.outputs.version }}
+      tagoverride: v${{ needs.compute-version.outputs.version }}
     secrets: inherit
 
   # Job 2: Package and push Helm chart to ghcr.io as OCI artifact
@@ -68,14 +70,18 @@ jobs:
 
           echo "Chart version: ${VERSION}"
 
+          # Chart version = VERSION (no v); appVersion + image tag = vVERSION (matches image)
           sed -i "s/^version:.*/version: ${VERSION}/" ${{ env.CHART_NAME }}/Chart.yaml
-          sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" ${{ env.CHART_NAME }}/Chart.yaml
-          sed -i "s|tag: \"\"|tag: ${VERSION}|" ${{ env.CHART_NAME }}/values.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"v${VERSION}\"/" ${{ env.CHART_NAME }}/Chart.yaml
+          sed -i "s|tag: \"\"|tag: v${VERSION}|" ${{ env.CHART_NAME }}/values.yaml
 
           helm lint ${{ env.CHART_NAME }}
           helm package ${{ env.CHART_NAME }}
 
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          # Chart and image share the same OCI repo, but with different tags:
+          #   image: v${VERSION} (e.g. v0.0.1-d3e4b1b)
+          #   chart: ${VERSION}  (e.g. 0.0.1-d3e4b1b, no 'v' prefix)
           helm push "${{ env.CHART_NAME }}-${VERSION}.tgz" oci://ghcr.io/${REPO_OWNER}
 
           echo "Chart pushed: oci://ghcr.io/${REPO_OWNER}/${{ env.CHART_NAME }}:${VERSION}"
@@ -91,11 +97,17 @@ jobs:
         with:
           version: ${{ env.HELM_VERSION }}
 
+      - name: Login to GHCR (avoids broken anonymous auth flow)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            --username "${{ github.actor }}" --password-stdin
+
       - name: Pull chart and deploy
         run: |
           VERSION="${{ needs.compute-version.outputs.version }}"
           # Runner pod has outbound internet; pull chart directly from ghcr.io
-          # (the daocloud mirror does NOT proxy OCI auth properly)
+          # (the daocloud mirror does NOT proxy OCI auth properly).
+          # Chart uses unprefixed version tag (image uses v-prefixed) to share OCI repo.
           CHART_REF="${CHART_REGISTRY:-oci://ghcr.io/matrixhub-ai}/${{ env.CHART_NAME }}"
           VALUES_FILE="${VALUES_FILE:-/etc/matrixhub/values-internal.yaml}"
           NAMESPACE="${DEPLOY_NAMESPACE:-matrixhub}"
@@ -111,10 +123,11 @@ jobs:
             echo "Using values from: ${VALUES_FILE}"
           fi
 
+          # Image tag has 'v' prefix; chart version doesn't
           helm upgrade ${{ env.CHART_NAME }} /tmp/chart/${{ env.CHART_NAME }} \
             -n "${NAMESPACE}" \
             ${VALS_ARGS} \
-            --set apiserver.image.tag="${VERSION}" \
+            --set apiserver.image.tag="v${VERSION}" \
             --force-conflicts \
             --wait --timeout 300s
 
