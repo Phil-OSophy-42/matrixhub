@@ -192,6 +192,45 @@
         ]
       }
     },
+    "/api/v1alpha1/sync-policies/{syncPolicyId}/switch": {
+      "put": {
+        "operationId": "SyncPolicy_UpdateSyncPolicySwitch",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alpha1UpdateSyncPolicySwitchResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "syncPolicyId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SyncPolicyUpdateSyncPolicySwitchBody"
+            }
+          }
+        ],
+        "tags": [
+          "SyncPolicy"
+        ]
+      }
+    },
     "/api/v1alpha1/sync-policies/{syncPolicyId}/sync-tasks": {
       "get": {
         "summary": "ListSyncTasks lists all sync tasks.",
@@ -233,10 +272,19 @@
             "format": "int32"
           },
           {
-            "name": "search",
+            "name": "status",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "SYNC_TASK_STATUS_UNSPECIFIED",
+              "SYNC_TASK_STATUS_RUNNING",
+              "SYNC_TASK_STATUS_SUCCEEDED",
+              "SYNC_TASK_STATUS_FAILED",
+              "SYNC_TASK_STATUS_STOPPED",
+              "SYNC_TASK_STATUS_PENDING"
+            ],
+            "default": "SYNC_TASK_STATUS_UNSPECIFIED"
           }
         ],
         "tags": [
@@ -263,6 +311,45 @@
         "parameters": [
           {
             "name": "syncPolicyId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "SyncPolicy"
+        ]
+      }
+    },
+    "/api/v1alpha1/sync-policies/{syncPolicyId}/sync-tasks/{syncTaskId}": {
+      "get": {
+        "summary": "GetSyncTask gets a sync task by id.",
+        "operationId": "SyncPolicy_GetSyncTask",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alpha1GetSyncTaskResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "syncPolicyId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "syncTaskId",
             "in": "path",
             "required": true,
             "type": "integer",
@@ -473,6 +560,14 @@
         }
       }
     },
+    "SyncPolicyUpdateSyncPolicySwitchBody": {
+      "type": "object",
+      "properties": {
+        "isDisabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "protobufAny": {
       "type": "object",
       "properties": {
@@ -575,6 +670,14 @@
         }
       }
     },
+    "v1alpha1GetSyncTaskResponse": {
+      "type": "object",
+      "properties": {
+        "syncTask": {
+          "$ref": "#/definitions/v1alpha1SyncTask"
+        }
+      }
+    },
     "v1alpha1ListSyncJobsResponse": {
       "type": "object",
       "properties": {
@@ -662,9 +765,6 @@
             "$ref": "#/definitions/v1alpha1ResourceType"
           }
         },
-        "targetResourceName": {
-          "type": "string"
-        },
         "sourceRegistry": {
           "$ref": "#/definitions/v1alpha1Registry",
           "description": "post or put do not require this field."
@@ -690,12 +790,8 @@
           "type": "integer",
           "format": "int64"
         },
-        "targetResourceName": {
-          "type": "string"
-        },
         "targetRegistry": {
-          "$ref": "#/definitions/v1alpha1Registry",
-          "description": "post or put do not require this field."
+          "$ref": "#/definitions/v1alpha1Registry"
         },
         "targetProjectName": {
           "type": "string"
@@ -827,6 +923,10 @@
         "completedTimestamp": {
           "type": "string",
           "format": "int64"
+        },
+        "createdTimestamp": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -940,7 +1040,8 @@
         "SYNC_TASK_STATUS_RUNNING",
         "SYNC_TASK_STATUS_SUCCEEDED",
         "SYNC_TASK_STATUS_FAILED",
-        "SYNC_TASK_STATUS_STOPPED"
+        "SYNC_TASK_STATUS_STOPPED",
+        "SYNC_TASK_STATUS_PENDING"
       ],
       "default": "SYNC_TASK_STATUS_UNSPECIFIED"
     },
@@ -962,6 +1063,14 @@
       }
     },
     "v1alpha1UpdateSyncPolicyResponse": {
+      "type": "object",
+      "properties": {
+        "syncPolicy": {
+          "$ref": "#/definitions/v1alpha1SyncPolicyItem"
+        }
+      }
+    },
+    "v1alpha1UpdateSyncPolicySwitchResponse": {
       "type": "object",
       "properties": {
         "syncPolicy": {

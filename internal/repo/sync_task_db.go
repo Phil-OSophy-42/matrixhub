@@ -60,7 +60,7 @@ func (r *syncTaskDB) DeleteSyncTask(ctx context.Context, id int) error {
 }
 
 // ListSyncTasksByPolicyID lists sync tasks by policy ID with pagination
-func (r *syncTaskDB) ListSyncTasksByPolicyID(ctx context.Context, policyID int, page, pageSize int, search string) ([]*syncpolicy.SyncTask, int64, error) {
+func (r *syncTaskDB) ListSyncTasksByPolicyID(ctx context.Context, policyID int, page, pageSize int, status syncpolicy.SyncTaskStatus) ([]*syncpolicy.SyncTask, int64, error) {
 	var tasks []*syncpolicy.SyncTask
 	var total int64
 
@@ -77,6 +77,29 @@ func (r *syncTaskDB) ListSyncTasksByPolicyID(ctx context.Context, policyID int, 
 	}
 
 	return tasks, total, nil
+}
+
+// SelectPendingTasks returns tasks with status = pending.
+func (r *syncTaskDB) SelectPendingTasks(ctx context.Context, limit int) ([]*syncpolicy.SyncTask, error) {
+	var rows []*syncpolicy.SyncTask
+	err := r.db.WithContext(ctx).
+		Where("status = ?", syncpolicy.SyncTaskStatusPending).
+		Order("created_at ASC").
+		Limit(limit).
+		Find(&rows).Error
+	return rows, err
+}
+
+// UpdateTaskStatusCAS atomically updates task status from fromStatus to toStatus.
+func (r *syncTaskDB) UpdateTaskStatusCAS(ctx context.Context, taskID int, fromStatus, toStatus syncpolicy.SyncTaskStatus) (bool, error) {
+	res := r.db.WithContext(ctx).Exec(
+		"UPDATE sync_tasks SET status = ? WHERE id = ? AND status = ?",
+		toStatus, taskID, fromStatus,
+	)
+	if res.Error != nil {
+		return false, res.Error
+	}
+	return res.RowsAffected == 1, nil
 }
 
 // Ensure syncTaskDB implements ISyncTaskRepo

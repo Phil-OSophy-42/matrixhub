@@ -1,19 +1,32 @@
 import {
+  Anchor,
   Badge,
   Group,
+  Stack,
   Text,
 } from '@mantine/core'
-import { SyncPolicyType } from '@matrixhub/api-ts/v1alpha1/sync_policy.pb'
+import {
+  SyncPolicyType,
+  TriggerType,
+} from '@matrixhub/api-ts/v1alpha1/sync_policy.pb'
+import { Link } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { DataTable, type DataTableProps } from '@/shared/components/DataTable'
+import {
+  DataTable,
+  type DataTableProps,
+  type DataTableRowActionsProps,
+} from '@/shared/components/DataTable'
+import { FieldHintLabel } from '@/shared/components/FieldHintLabel'
 
 import { DeleteReplicationAction } from './DeleteReplicationAction'
 import { EditReplicationAction } from './EditReplicationAction'
 import { SyncReplicationAction } from './SyncReplicationAction'
+import { ToggleReplicationAction } from './ToggleReplicationAction'
 import {
   formatReplicationBandwidth,
+  getCronExpressionDescription,
   getReplicationRowId,
 } from '../replications.utils'
 
@@ -23,17 +36,36 @@ import type { MRT_ColumnDef } from 'mantine-react-table'
 
 type ReplicationCellProps = Parameters<NonNullable<MRT_ColumnDef<SyncPolicyItem>['Cell']>>[0]
 
-type ReplicationActionCellProps = Parameters<NonNullable<DataTableProps<SyncPolicyItem>['renderRowActions']>>[0]
-
 type ReplicationsTableProps = Omit<DataTableProps<SyncPolicyItem>, 'columns'>
 
 const EMPTY_VALUE = '-'
 
 function ReplicationNameCell({ row }: ReplicationCellProps) {
+  const name = row.original.name
+  const replicationId = row.original.id
+
+  if (replicationId == null) {
+    return (
+      <Text fw={500}>
+        {name ?? EMPTY_VALUE}
+      </Text>
+    )
+  }
+
   return (
-    <Text fw={500}>
-      {row.original.name ?? EMPTY_VALUE}
-    </Text>
+    <Anchor
+      fw={500}
+      underline="never"
+      renderRoot={props => (
+        <Link
+          {...props}
+          to="/admin/replications/$replicationId/executions"
+          params={{ replicationId: String(replicationId) }}
+        />
+      )}
+    >
+      {name ?? EMPTY_VALUE}
+    </Anchor>
   )
 }
 
@@ -50,27 +82,62 @@ function ReplicationStatusCell({ row }: ReplicationCellProps) {
   )
 }
 
+function ReplicationTriggerTypeCell({ row }: ReplicationCellProps) {
+  const {
+    t,
+    i18n,
+  } = useTranslation()
+  const triggerType = row.original.triggerType
+
+  if (triggerType === TriggerType.TRIGGER_TYPE_MANUAL) {
+    return t('routes.admin.replications.trigger.manual')
+  }
+
+  if (triggerType !== TriggerType.TRIGGER_TYPE_SCHEDULED) {
+    return EMPTY_VALUE
+  }
+
+  const cronExpression = row.original.triggerTypeSchedule?.cron?.trim() ?? ''
+  const cronDescription = getCronExpressionDescription(
+    cronExpression,
+    i18n.resolvedLanguage ?? i18n.language,
+  )
+  const cronExpressionHint = cronDescription
+    ? t('routes.admin.replications.form.cronExpressionHelp', {
+        description: cronDescription,
+      })
+    : t('routes.admin.replications.form.cronExpressionHint')
+
+  return (
+    <FieldHintLabel
+      label={t('routes.admin.replications.trigger.scheduled')}
+      hint={(
+        <Stack gap={4}>
+          <Text size="xs">
+            {t('routes.admin.replications.form.cronExpressionRaw', {
+              cron: cronExpression || EMPTY_VALUE,
+            })}
+          </Text>
+          <Text size="xs">
+            {cronExpressionHint}
+          </Text>
+        </Stack>
+      )}
+      tooltipProps={{ w: 360 }}
+    />
+  )
+}
+
 function ReplicationActionsCell({
   row,
-}: ReplicationActionCellProps) {
+}: DataTableRowActionsProps<SyncPolicyItem>) {
   const isDisabled = row.original.id == null
-  // const isDisabledToggle = row.original.isDisabled
-  // const toggleLabel = isDisabledToggle
-  //   ? t('routes.admin.replications.actions.enable')
-  //   : t('routes.admin.replications.actions.disable')
 
   return (
     <Group gap={4} wrap="nowrap">
       <EditReplicationAction syncPolicy={row.original} disabled={isDisabled} />
       <SyncReplicationAction syncPolicy={row.original} disabled={isDisabled} />
-      {/* <Button
-        variant="transparent"
-        size="compact-sm"
-        color="blue"
-        disabled={isDisabled}
-      >
-        {toggleLabel}
-      </Button> */}
+      <ToggleReplicationAction syncPolicy={row.original} disabled={isDisabled} />
       <DeleteReplicationAction syncPolicy={row.original} disabled={isDisabled} />
     </Group>
   )
@@ -81,12 +148,15 @@ function getRegistryLabel(registry?: Registry) {
 }
 
 function formatLocation(parts: (string | undefined)[]) {
-  const location = parts
-    .map(part => part?.trim())
-    .filter((part): part is string => Boolean(part))
-    .join(' : ')
+  const normalized = parts.map(part => part?.trim() || '')
 
-  return location || EMPTY_VALUE
+  if (normalized.every(part => !part)) {
+    return EMPTY_VALUE
+  }
+
+  return normalized
+    .map(part => part || EMPTY_VALUE)
+    .join(' : ')
 }
 
 function getReplicationSource(item: SyncPolicyItem, localLabel: string) {
@@ -162,17 +232,8 @@ export function ReplicationsTable(props: ReplicationsTableProps) {
     {
       id: 'triggerType',
       header: t('routes.admin.replications.table.triggerType'),
-      accessorFn: (row) => {
-        if (row.triggerType === 'TRIGGER_TYPE_MANUAL') {
-          return t('routes.admin.replications.trigger.manual')
-        }
-
-        if (row.triggerType === 'TRIGGER_TYPE_SCHEDULED') {
-          return t('routes.admin.replications.trigger.scheduled')
-        }
-
-        return EMPTY_VALUE
-      },
+      accessorFn: row => row.triggerType ?? EMPTY_VALUE,
+      Cell: ReplicationTriggerTypeCell,
     },
     {
       id: 'bandwidth',
@@ -194,7 +255,6 @@ export function ReplicationsTable(props: ReplicationsTableProps) {
       getRowId={getReplicationRowId}
       enableRowActions
       renderRowActions={ReplicationActionsCell}
-      positionActionsColumn="last"
     />
   )
 }

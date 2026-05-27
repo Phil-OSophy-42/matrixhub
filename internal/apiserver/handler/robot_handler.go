@@ -50,11 +50,12 @@ func (r *RobotHandler) CreateRobotAccount(ctx context.Context, request *v1alpha1
 	if err == nil {
 		return nil, status.Error(codes.AlreadyExists, "robot name already exists")
 	}
-
-	if err = role.PlatformPermissions.CheckPermissions(request.PlatformPermissions); err != nil {
+	platformPermissions := role.StringsToPermissions(request.PlatformPermissions)
+	projectPermissions := role.StringsToPermissions(request.ProjectPermissions)
+	if err = role.PlatformPermissions.CheckPermissions(platformPermissions); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if err = role.ProjectPermissions.CheckPermissions(request.ProjectPermissions); err != nil {
+	if err = role.ProjectPermissions.CheckPermissions(projectPermissions); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -75,8 +76,8 @@ func (r *RobotHandler) CreateRobotAccount(ctx context.Context, request *v1alpha1
 		Name:                robotName,
 		Description:         request.Description,
 		Duration:            int(request.ExpireDays),
-		PlatformPermissions: request.PlatformPermissions,
-		ProjectPermissions:  request.ProjectPermissions,
+		PlatformPermissions: platformPermissions,
+		ProjectPermissions:  projectPermissions,
 		Enabled:             true,
 		TokenHash:           hash,
 		Projects:            projects,
@@ -139,19 +140,23 @@ func (r *RobotHandler) transferRobot(item *robot.Robot) *v1alpha1.GetRobotAccoun
 		scope = v1alpha1.RobotAccountProjectScope_ROBOT_ACCOUNT_PROJECT_SCOPE_ALL
 	}
 
+	projects := lo.Map(item.Projects, func(p *project.Project, _ int) string {
+		return p.Name
+	})
+
 	return &v1alpha1.GetRobotAccountResponse{
 		Id:                  uint32(item.ID),
 		Name:                item.Name,
 		Description:         item.Description,
 		Status:              status,
-		PlatformPermissions: item.PlatformPermissions,
-		ProjectPermissions:  item.ProjectPermissions,
-		//Projects:            ,
-		CreatedAt:    strconv.Itoa(int(item.CreatedAt.Unix())),
-		ExpireStatus: expireStatus,
-		RemainPeriod: remainPeriod,
-		ExpireDays:   int32(item.Duration),
-		ProjectScope: scope,
+		PlatformPermissions: role.PermissionsToStrings(item.PlatformPermissions),
+		ProjectPermissions:  role.PermissionsToStrings(item.ProjectPermissions),
+		Projects:            projects,
+		CreatedAt:           strconv.Itoa(int(item.CreatedAt.Unix())),
+		ExpireStatus:        expireStatus,
+		RemainPeriod:        remainPeriod,
+		ExpireDays:          int32(item.Duration),
+		ProjectScope:        scope,
 	}
 }
 
@@ -187,10 +192,12 @@ func (r *RobotHandler) UpdateRobotAccount(ctx context.Context, request *v1alpha1
 	if err := request.ValidateAll(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if err := role.PlatformPermissions.CheckPermissions(request.PlatformPermissions); err != nil {
+	platformPermissions := role.StringsToPermissions(request.PlatformPermissions)
+	projectPermissions := role.StringsToPermissions(request.ProjectPermissions)
+	if err := role.PlatformPermissions.CheckPermissions(platformPermissions); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if err := role.ProjectPermissions.CheckPermissions(request.ProjectPermissions); err != nil {
+	if err := role.ProjectPermissions.CheckPermissions(projectPermissions); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	rb, err := r.robotRepo.GetRobot(ctx, int(request.Id))
@@ -206,15 +213,19 @@ func (r *RobotHandler) UpdateRobotAccount(ctx context.Context, request *v1alpha1
 		scope = robot.ProjectScopeAll
 	}
 	rb.Description = request.Description
-	rb.Duration = int(request.ExpireDays)
-	rb.PlatformPermissions = request.PlatformPermissions
-	rb.ProjectPermissions = request.ProjectPermissions
+	rb.PlatformPermissions = platformPermissions
+	rb.ProjectPermissions = projectPermissions
 	rb.ProjectScope = scope
 
-	if request.ExpireDays > 0 {
-		expireAt := time.Now().AddDate(0, 0, int(request.ExpireDays))
-		rb.ExpireAt = &expireAt
+	if int(request.ExpireDays) != rb.Duration {
+		if request.ExpireDays == 0 {
+			rb.ExpireAt = nil
+		} else {
+			expireAt := rb.CreatedAt.AddDate(0, 0, int(request.ExpireDays))
+			rb.ExpireAt = &expireAt
+		}
 	}
+	rb.Duration = int(request.ExpireDays)
 
 	rb.Projects, err = r.checkProjects(ctx, request.ProjectScope, request.Projects)
 	if err != nil {

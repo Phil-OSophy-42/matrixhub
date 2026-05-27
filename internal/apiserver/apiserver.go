@@ -23,15 +23,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/matrixhub-ai/hfd/pkg/authenticate"
-	backendhttp "github.com/matrixhub-ai/hfd/pkg/backend/http"
-	backendlfs "github.com/matrixhub-ai/hfd/pkg/backend/lfs"
 	backendssh "github.com/matrixhub-ai/hfd/pkg/backend/ssh"
 	"github.com/matrixhub-ai/hfd/pkg/lfs"
 	"github.com/matrixhub-ai/hfd/pkg/mirror"
@@ -45,16 +45,25 @@ import (
 
 	"github.com/matrixhub-ai/matrixhub/internal/apiserver/handler"
 	backendhf "github.com/matrixhub-ai/matrixhub/internal/apiserver/handler/hf"
+	backendhttp "github.com/matrixhub-ai/matrixhub/internal/apiserver/handler/http"
+	backendlfs "github.com/matrixhub-ai/matrixhub/internal/apiserver/handler/lfs"
 	"github.com/matrixhub-ai/matrixhub/internal/apiserver/middleware"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/authz"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/dataset"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/model"
+	"github.com/matrixhub-ai/matrixhub/internal/domain/registrydiscovery"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/syncjob"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/syncpolicy"
 	"github.com/matrixhub-ai/matrixhub/internal/domain/user"
 	"github.com/matrixhub-ai/matrixhub/internal/infra/config"
 	"github.com/matrixhub-ai/matrixhub/internal/infra/log"
+	"github.com/matrixhub-ai/matrixhub/internal/infra/utils"
+	"github.com/matrixhub-ai/matrixhub/internal/jobserver"
+	"github.com/matrixhub-ai/matrixhub/internal/jobserver/canceller"
+	"github.com/matrixhub-ai/matrixhub/internal/jobserver/logstore"
 	"github.com/matrixhub-ai/matrixhub/internal/repo"
+	hfdiscovery "github.com/matrixhub-ai/matrixhub/internal/repo/registrydiscovery/hf"
+	mhdiscovery "github.com/matrixhub-ai/matrixhub/internal/repo/registrydiscovery/matrixhub"
 )
 
 const maxGrpcMsgSize = 100 * 1024 * 1024
@@ -77,6 +86,10 @@ type APIServer struct {
 	repos    *repo.Repos
 	services *Services
 	handlers []handler.IHandler
+
+	jobServer *jobserver.JobServer
+	jobCancel context.CancelFunc
+	jobWait   sync.WaitGroup
 }
 
 func NewAPIServer(config *config.Config) *APIServer {
@@ -95,8 +108,7 @@ func NewAPIServer(config *config.Config) *APIServer {
 	)
 
 	httpServer := &http.Server{
-		Handler:           engine,
-		ReadHeaderTimeout: 30 * time.Second,
+		Handler: engine,
 	}
 
 	server := &APIServer{
@@ -108,19 +120,20 @@ func NewAPIServer(config *config.Config) *APIServer {
 		port:       config.APIServer.Port,
 	}
 
-	server.initGitAuth()
-	server.initGitHooks()
+	server.initMirrorHooks()
 	server.initGitStorage()
-	server.initSSHBackend()
 	server.initHandlersServicesRepos()
+	server.initGitHooks()
+	server.initGitAuth()
+	server.initSSHBackend()
 
 	// Register authn + authz middleware (must be after initHandlersServicesRepos)
 	streamMiddleware := []grpc.StreamServerInterceptor{
 		grpc_recovery.StreamServerInterceptor(),
 	}
 	unaryMiddleware := []grpc.UnaryServerInterceptor{
-		grpc_recovery.UnaryServerInterceptor(),
-		middleware.AuthInterceptor(server.repos.Session),
+		grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(middleware.RecoveryFunc)),
+		middleware.AuthInterceptor(server.repos.Session, server.repos.User, server.repos.AccessToken, server.repos.Robot),
 		middleware.AuthzInterceptor(server.services.Authz.VerifyPlatformPermission),
 	}
 
@@ -143,30 +156,47 @@ func NewAPIServer(config *config.Config) *APIServer {
 }
 
 type gitHooks struct {
-	permissionHookFunc  func(ctx context.Context, op permission.Operation, repoName string, opCtx permission.Context) (bool, error)
-	preReceiveHookFunc  func(ctx context.Context, repoName string, updates []receive.RefUpdate) (bool, error)
-	postReceiveHookFunc func(ctx context.Context, repoName string, updates []receive.RefUpdate) error
-	mirrorSourceFunc    func(ctx context.Context, repoName string) (string, bool, error)
-	mirrorRefFilterFunc func(ctx context.Context, repoName string, remoteRefs []string) ([]string, error)
+	permissionHookFunc    func(ctx context.Context, op permission.Operation, repoName string, opCtx permission.Context) (bool, error)
+	preReceiveHookFunc    func(ctx context.Context, repoName string, updates []receive.RefUpdate) (bool, error)
+	postReceiveHookFunc   func(ctx context.Context, repoName string, updates []receive.RefUpdate) error
+	mirrorSourceFunc      func(ctx context.Context, repoName string) (string, bool, error)
+	mirrorDestinationFunc func(ctx context.Context, repoName string) (string, bool, error)
+	mirrorRefFilterFunc   func(ctx context.Context, repoName string, remoteRefs []string) ([]string, error)
 }
 
 func (server *APIServer) initGitHooks() {
-	permissionHookFunc := func(ctx context.Context, op permission.Operation, repoName string, opCtx permission.Context) (bool, error) {
-		// userInfo, _ := authenticate.GetUserInfo(ctx)
-		return true, nil // or return false, nil to deny, or return an error to indicate an error
-	}
+	permissionHookFunc := middleware.NewRepoEnforcer(server.services.Authz)
 
 	preReceiveHookFunc := func(ctx context.Context, repoName string, updates []receive.RefUpdate) (bool, error) {
-		// userInfo, _ := authenticate.GetUserInfo(ctx)
-		return true, nil // or return false, nil to deny, or return an error to indicate an error
+		repoType, project, name, ok := utils.ParseFromRepoName(repoName)
+		if !ok {
+			return false, nil
+		}
+		if repoType == "models" {
+			_, err := server.services.Model.EnsureModel(ctx, project, name)
+			return err == nil, err
+		}
+
+		return false, nil
 	}
 
 	postReceiveHookFunc := func(ctx context.Context, repoName string, updates []receive.RefUpdate) error {
 		return nil
 	}
 
+	server.gitHooks.permissionHookFunc = permissionHookFunc
+	server.gitHooks.preReceiveHookFunc = preReceiveHookFunc
+	server.gitHooks.postReceiveHookFunc = postReceiveHookFunc
+
+}
+
+func (server *APIServer) initMirrorHooks() {
 	mirrorSourceFunc := func(ctx context.Context, repoName string) (string, bool, error) {
 		// return baseURL + "/" + repoName, true, nil
+		return "", false, nil
+	}
+
+	mirrorDestinationFunc := func(ctx context.Context, repoName string) (string, bool, error) {
 		return "", false, nil
 	}
 
@@ -179,11 +209,8 @@ func (server *APIServer) initGitHooks() {
 		}
 		return filteredRefs, nil
 	}
-
-	server.gitHooks.permissionHookFunc = permissionHookFunc
-	server.gitHooks.preReceiveHookFunc = preReceiveHookFunc
-	server.gitHooks.postReceiveHookFunc = postReceiveHookFunc
 	server.gitHooks.mirrorSourceFunc = mirrorSourceFunc
+	server.gitHooks.mirrorDestinationFunc = mirrorDestinationFunc
 	server.gitHooks.mirrorRefFilterFunc = mirrorRefFilterFunc
 }
 
@@ -195,24 +222,9 @@ type gitAuth struct {
 }
 
 func (server *APIServer) initGitAuth() {
-	// TODO: implement real validators that validate the credentials and return the corresponding user info.
-	// For now, we just return true for all validators to allow all requests to pass through.
-	// This is not secure and should be replaced with real implementations.
-
-	basicAuthValidator := authenticate.BasicAuthValidatorFunc(func(ctx context.Context, username, password string) (user string, next, ok bool, err error) {
-		// validate username and password, return true if valid, false if invalid, or an error if there's an error during validation
-		return "", false, true, nil
-	})
-
-	publicKeyValidator := authenticate.PublicKeyValidatorFunc(func(ctx context.Context, username string, keyType string, marshaledKey []byte) (user string, next, ok bool, err error) {
-		// validate the public key for the given username, return true if valid, false if invalid, or an error if there's an error during validation
-		return "", false, true, nil
-	})
-
-	tokenValidator := authenticate.TokenValidatorFunc(func(ctx context.Context, token string) (user string, next, ok bool, err error) {
-		// validate the token, return true if valid, false if invalid, or an error if there's an error during validation
-		return "", false, true, nil
-	})
+	basicAuthValidator := middleware.GitBasicAuthAuthn(server.repos.AccessToken, server.repos.Robot)
+	publicKeyValidator := middleware.GitPublicKeyAuthn(server.repos.SSHKey, server.repos.User)
+	tokenValidator := middleware.GitHTTPAuthn(server.repos.AccessToken, server.repos.Robot)
 
 	// TODO: Use a proper secret management solution to manage the token signing secret.
 	// Generating and validating temporary tokens.
@@ -239,22 +251,24 @@ func (server *APIServer) initGitStorage() {
 
 	lfsStorage := lfs.NewLocal(storage.LFSDir())
 
-	lfsTeeCache := lfs.NewTeeCache(
-		lfsStorage,
-	)
-
 	mirrorSourceFunc := server.gitHooks.mirrorSourceFunc
+	mirrorDestinationFunc := server.gitHooks.mirrorDestinationFunc
 	mirrorRefFilterFunc := server.gitHooks.mirrorRefFilterFunc
 	preReceiveHookFunc := server.gitHooks.preReceiveHookFunc
 	postReceiveHookFunc := server.gitHooks.postReceiveHookFunc
 
 	sharedMirror := mirror.NewMirror(
 		mirror.WithMirrorSourceFunc(mirrorSourceFunc),
+		mirror.WithMirrorDestinationFunc(mirrorDestinationFunc),
 		mirror.WithMirrorRefFilterFunc(mirrorRefFilterFunc),
 		mirror.WithPreReceiveHookFunc(preReceiveHookFunc),
 		mirror.WithPostReceiveHookFunc(postReceiveHookFunc),
-		mirror.WithLFSCache(lfsTeeCache),
+		mirror.WithLFSStorage(lfsStorage),
+		mirror.WithPushXET(true),
+		mirror.WithPullXET(false),
+		mirror.WithConcurrency(2),
 		mirror.WithTTL(time.Minute),
+		mirror.WithCacheDir(storage.TmpDir()),
 	)
 
 	server.gitStorage.storage = storage
@@ -282,11 +296,19 @@ func (server *APIServer) initBackends(handler http.Handler) http.Handler {
 		backendhf.WithPostReceiveHookFunc(postReceiveHookFunc),
 		backendhf.WithLFSStorage(lfsStorage),
 		backendhf.WithMiddlewares(
-			middleware.HFAuthenticationMiddleware(server.repos.AccessToken, server.repos.Session),
-			middleware.HFAuthzMiddleware(server.services.Authz),
+			middleware.HFAuthnMiddleware(server.repos.AccessToken, server.repos.Session, server.repos.User, server.repos.Robot),
 		),
 		backendhf.WithServices(server.services.Model, server.repos.Git, server.services.Authz),
 	)
+
+	gitAuthn := func() mux.MiddlewareFunc {
+		return func(next http.Handler) http.Handler {
+			next = authenticate.BasicAuthHandler(basicAuthValidator, next)
+			next = authenticate.TokenValidatorHandler(tokenValidator, next)
+			next = authenticate.AnonymousAuthenticateHandler(next)
+			return next
+		}
+	}
 
 	handler = backendlfs.NewHandler(
 		backendlfs.WithStorage(storage),
@@ -295,6 +317,7 @@ func (server *APIServer) initBackends(handler http.Handler) http.Handler {
 		backendlfs.WithPermissionHookFunc(permissionHookFunc),
 		backendlfs.WithLFSStorage(lfsStorage),
 		backendlfs.WithMirror(sharedMirror),
+		backendlfs.WithMiddlewares(gitAuthn()),
 	)
 
 	handler = backendhttp.NewHandler(
@@ -304,12 +327,11 @@ func (server *APIServer) initBackends(handler http.Handler) http.Handler {
 		backendhttp.WithPermissionHookFunc(permissionHookFunc),
 		backendhttp.WithPreReceiveHookFunc(preReceiveHookFunc),
 		backendhttp.WithPostReceiveHookFunc(postReceiveHookFunc),
+		backendhttp.WithMiddlewares(gitAuthn()),
+		backendhttp.WithServices(server.services.Model, server.repos.Git, server.services.Authz),
 	)
 
-	handler = authenticate.AnonymousAuthenticateHandler(handler)
-	handler = authenticate.TokenValidatorHandler(tokenValidator, handler)
 	handler = authenticate.TokenSignValidatorHandler(tokenSignValidator, handler)
-	handler = authenticate.BasicAuthHandler(basicAuthValidator, handler)
 
 	return handler
 }
@@ -366,7 +388,7 @@ func (server *APIServer) initHandlersServicesRepos() {
 	)
 
 	// init permission service
-	authzService := authz.NewAuthzService(repos.Authz, repos.Project)
+	authzService := authz.NewAuthzService(repos.Authz, repos.Project, repos.Robot)
 
 	// init domain services, add if needed
 	modelService := model.NewModelService(
@@ -383,21 +405,47 @@ func (server *APIServer) initHandlersServicesRepos() {
 	)
 	userService := user.NewUserService(repos.Session, repos.User)
 
-	// init sync job service (required by sync policy service)
+	logDir := ""
+	if server.config.JobServer != nil {
+		logDir = server.config.JobServer.LogDir
+	}
+	if logDir == "" {
+		logDir = filepath.Join(server.config.DataDir, "logs", "jobs")
+	}
+	logStore := logstore.NewFileLogStore(logDir)
+	canc := canceller.NewMemCanceller()
+
 	syncJobService := syncjob.NewSyncJobService(
 		repos.SyncJob,
 		repos.Registry,
 		repos.Project,
 		repos.Model,
 		repos.Git,
+		logStore,
 	)
 
 	// init sync policy service
+	discoveries := map[string]registrydiscovery.Discovery{
+		registrydiscovery.ProviderHuggingFace: hfdiscovery.New(),
+		registrydiscovery.ProviderMatrixHub:   mhdiscovery.New(),
+	}
+	jobGenerator := syncpolicy.NewSyncJobGenerator(repos.Registry, discoveries)
 	syncPolicyService := syncpolicy.NewSyncPolicyService(
 		repos.SyncPolicy,
 		repos.SyncTask,
 		syncJobService,
+		repos.Project,
+		jobGenerator,
 	)
+
+	// wire task status reporter from sync policy service to sync job service
+	syncJobService.SetOnJobDone(syncPolicyService.ReportTaskStatus)
+
+	if server.config.JobServer != nil && server.config.JobServer.Enabled {
+		jc := *server.config.JobServer
+		server.jobServer = jobserver.New(&jc, syncPolicyService, syncJobService, logStore, canc)
+	}
+
 	server.services = &Services{
 		Model:   modelService,
 		Dataset: datasetService,
@@ -409,11 +457,11 @@ func (server *APIServer) initHandlersServicesRepos() {
 		handler.NewLoginHandler(userService),
 		handler.NewRegistryHandler(repos.Registry),
 		handler.NewProjectHandler(repos.Project, authzService),
-		handler.NewCurrentUserHandler(repos.User, repos.AccessToken),
+		handler.NewCurrentUserHandler(repos.User, repos.AccessToken, repos.SSHKey),
 		handler.NewUserHandler(repos.User, authzService),
 		handler.NewDatasetHandler(datasetService),
 		handler.NewModelHandler(modelService, authzService),
-		handler.NewSyncPolicyHandler(syncPolicyService, repos.Registry),
+		handler.NewSyncPolicyHandler(syncPolicyService, syncJobService, repos.Registry, logStore, canc),
 		handler.NewRoleHandler(),
 		handler.NewRobotHandler(repos.Robot, repos.Project),
 	}
@@ -525,11 +573,33 @@ func (server *APIServer) Start() <-chan error {
 		}()
 	}
 
+	if server.jobServer != nil {
+		jsCtx, cancel := context.WithCancel(context.Background())
+		server.jobCancel = cancel
+		server.jobWait.Add(1)
+		go func() {
+			defer server.jobWait.Done()
+			server.jobServer.Run(jsCtx)
+		}()
+	}
+
 	return errorCh
 }
 
 func (server *APIServer) Shutdown() {
 	log.Info("api server shutdown...")
+
+	if server.jobCancel != nil {
+		server.jobCancel()
+	}
+	if server.jobServer != nil {
+		grace := server.config.JobServer.ShutdownGrace
+		if grace == 0 {
+			grace = 30 * time.Second
+		}
+		server.jobServer.Shutdown(grace)
+	}
+	server.jobWait.Wait()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

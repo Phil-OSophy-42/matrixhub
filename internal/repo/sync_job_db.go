@@ -56,16 +56,54 @@ func (r *syncJobDB) DeleteSyncJob(ctx context.Context, id int) error {
 	return r.db.WithContext(ctx).Delete(&syncjob.SyncJob{}, id).Error
 }
 
-// ListSyncJobsByTaskID lists sync jobs by task ID
-func (r *syncJobDB) ListSyncJobsByTaskID(ctx context.Context, taskID int) ([]*syncjob.SyncJob, error) {
+// ListSyncJobsByTaskID lists sync jobs by task ID with pagination and filtering
+func (r *syncJobDB) ListSyncJobsByTaskID(ctx context.Context, taskID int, page, pageSize int, status syncjob.SyncJobStatus, resourceType string) ([]*syncjob.SyncJob, int64, error) {
 	var jobs []*syncjob.SyncJob
-	err := r.db.WithContext(ctx).
-		Where("sync_task_id = ?", taskID).
-		Find(&jobs).Error
-	if err != nil {
-		return nil, err
+	var total int64
+
+	query := r.db.WithContext(ctx).Model(&syncjob.SyncJob{}).
+		Where("sync_task_id = ?", taskID)
+
+	if status > syncjob.SyncJobStatusUnspecified {
+		query = query.Where("status = ?", status)
 	}
-	return jobs, nil
+	if resourceType != "" {
+		query = query.Where("resource_type = ?", resourceType)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&jobs).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return jobs, total, nil
+}
+
+// SelectPendingJobs returns jobs with status = pending.
+func (r *syncJobDB) SelectPendingJobs(ctx context.Context, limit int) ([]*syncjob.SyncJob, error) {
+	var rows []*syncjob.SyncJob
+	err := r.db.WithContext(ctx).
+		Where("status = ?", syncjob.SyncJobStatusPending).
+		Order("created_at ASC").
+		Limit(limit).
+		Find(&rows).Error
+	return rows, err
+}
+
+// UpdateJobStatusCAS atomically updates job status from fromStatus to toStatus.
+func (r *syncJobDB) UpdateJobStatusCAS(ctx context.Context, jobID int, fromStatus, toStatus syncjob.SyncJobStatus) (bool, error) {
+	res := r.db.WithContext(ctx).Exec(
+		"UPDATE sync_jobs SET status = ? WHERE id = ? AND status = ?",
+		toStatus, jobID, fromStatus,
+	)
+	if res.Error != nil {
+		return false, res.Error
+	}
+	return res.RowsAffected == 1, nil
 }
 
 // Ensure syncJobDB implements ISyncJobRepo

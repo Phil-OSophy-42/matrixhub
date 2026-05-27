@@ -22,7 +22,15 @@ const config: Config = {
 
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'zh-CN'],
+    localeConfigs: {
+      en: {
+        label: 'English',
+      },
+      'zh-CN': {
+        label: '简体中文',
+      },
+    },
   },
 
   presets: [
@@ -32,8 +40,12 @@ const config: Config = {
         docs: {
           path: './docs',
           routeBasePath: 'docs',
+          sidebarPath: './sidebars.ts',
         },
-        blog: false,
+        blog: {
+          routeBasePath: 'blog',
+          showReadingTime: true,
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -52,15 +64,34 @@ const config: Config = {
       title: 'MatrixHub',
       logo: {
         alt: 'MatrixHub Logo',
-        src: 'img/matrixhub-logo.png',
+        src: 'img/matrixhub-icon-colorlight.png',
         style: { height: '32px', width: '32px', borderRadius: '6px' },
       },
       hideOnScroll: false,
       items: [
         {
-          to: 'docs/intro',
-          label: 'Documentation',
+          to: '/product',
+          label: 'Product',
           position: 'left',
+        },
+        {
+          to: '/docs/overview',
+          label: 'Docs',
+          position: 'left',
+        },
+        {
+          to: '/blog',
+          label: 'Blog',
+          position: 'left',
+        },
+        {
+          to: '/community',
+          label: 'Community',
+          position: 'left',
+        },
+        {
+          type: 'localeDropdown',
+          position: 'right',
         },
         {
           href: 'https://github.com/matrixhub-ai/matrixhub',
@@ -69,7 +100,7 @@ const config: Config = {
           className: 'navbar-github-link',
         },
         {
-          href: 'https://github.com/matrixhub-ai/matrixhub',
+          to: '/docs/getting-started',
           label: 'Get Started',
           position: 'right',
           className: 'navbar-get-started-button',
@@ -82,22 +113,27 @@ const config: Config = {
         {
           title: 'Product',
           items: [
-            { label: 'Integrations', href: '#' },
-            { label: 'Roadmap', href: '#' },
+            { label: 'Why MatrixHub', to: '/product/why-matrixhub' },
+            { label: 'Use Cases', to: '/product/use-cases' },
+            { label: 'Architecture', to: '/product/architecture' },
+            { label: 'Comparison', to: '/product/comparison' },
           ],
         },
         {
           title: 'Resources',
           items: [
-            { label: 'Documentation', href: 'https://github.com/matrixhub-ai/matrixhub' },
-            { label: 'API Reference', href: '#' },
-            { label: 'Community', href: '#' },
+            { label: 'Documentation', to: '/docs/overview' },
+            { label: 'API Reference', to: '/docs/reference' },
+            { label: 'Blog', to: '/blog' },
+            { label: 'Changelog', to: '/changelog' },
           ],
         },
         {
-          title: 'Connect',
+          title: 'Community',
           items: [
             { label: 'GitHub', href: 'https://github.com/matrixhub-ai/matrixhub' },
+            { label: 'Community', to: '/community' },
+            { label: 'Roadmap', to: '/roadmap' },
           ],
         },
       ],

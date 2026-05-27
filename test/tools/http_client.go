@@ -24,6 +24,9 @@ import (
 	v1alpha1current_user "github.com/matrixhub-ai/matrixhub/test/client/v1alpha1/current_user"
 	v1alpha1model "github.com/matrixhub-ai/matrixhub/test/client/v1alpha1/model"
 	v1alpha1project "github.com/matrixhub-ai/matrixhub/test/client/v1alpha1/project"
+	v1alpha1registry "github.com/matrixhub-ai/matrixhub/test/client/v1alpha1/registry"
+	v1alpha1robot "github.com/matrixhub-ai/matrixhub/test/client/v1alpha1/robot"
+	v1alpha1sync_policy "github.com/matrixhub-ai/matrixhub/test/client/v1alpha1/sync_policy"
 	v1alpha1user "github.com/matrixhub-ai/matrixhub/test/client/v1alpha1/user"
 )
 
@@ -36,6 +39,9 @@ var (
 	v1alpha1UsersApi       *v1alpha1user.UsersApiService
 	v1alpha1CurrentUserApi *v1alpha1current_user.CurrentUserApiService
 	v1alpha1ModelsApi      *v1alpha1model.ModelsApiService
+	v1alpha1RegistriesApi  *v1alpha1registry.RegistriesApiService
+	v1alpha1RobotsApi      *v1alpha1robot.RobotsApiService
+	v1alpha1SyncPolicyApi  *v1alpha1sync_policy.SyncPolicyApiService
 )
 
 // InitHTTPClients initializes HTTP API clients with admin authentication
@@ -98,6 +104,30 @@ func InitHTTPClients() error {
 		}
 		v1alpha1ModelsApi = v1alpha1model.NewAPIClient(modelCfg).ModelsApi
 
+		// Initialize Registry API client
+		registryCfg := &v1alpha1registry.Configuration{
+			BasePath:      baseURL,
+			DefaultHeader: defaultHeaders,
+			HTTPClient:    httpClient,
+		}
+		v1alpha1RegistriesApi = v1alpha1registry.NewAPIClient(registryCfg).RegistriesApi
+
+		// Initialize Robot API client
+		robotCfg := &v1alpha1robot.Configuration{
+			BasePath:      baseURL,
+			DefaultHeader: defaultHeaders,
+			HTTPClient:    httpClient,
+		}
+		v1alpha1RobotsApi = v1alpha1robot.NewAPIClient(robotCfg).RobotsApi
+
+		// Initialize SyncPolicy API client
+		syncPolicyCfg := &v1alpha1sync_policy.Configuration{
+			BasePath:      baseURL,
+			DefaultHeader: defaultHeaders,
+			HTTPClient:    httpClient,
+		}
+		v1alpha1SyncPolicyApi = v1alpha1sync_policy.NewAPIClient(syncPolicyCfg).SyncPolicyApi
+
 		log.Println("HTTP clients initialized successfully")
 	})
 
@@ -146,6 +176,39 @@ func GetV1alpha1ModelsApi() *v1alpha1model.ModelsApiService {
 		}
 	}
 	return v1alpha1ModelsApi
+}
+
+// GetV1alpha1RegistriesApi returns the Registries HTTP API client.
+func GetV1alpha1RegistriesApi() *v1alpha1registry.RegistriesApiService {
+	if v1alpha1RegistriesApi == nil {
+		err := InitHTTPClients()
+		if err != nil {
+			panic(err)
+		}
+	}
+	return v1alpha1RegistriesApi
+}
+
+// GetV1alpha1RobotsApi returns the Robots HTTP API client.
+func GetV1alpha1RobotsApi() *v1alpha1robot.RobotsApiService {
+	if v1alpha1RobotsApi == nil {
+		err := InitHTTPClients()
+		if err != nil {
+			panic(err)
+		}
+	}
+	return v1alpha1RobotsApi
+}
+
+// GetV1alpha1SyncPolicyApi returns the SyncPolicy HTTP API client.
+func GetV1alpha1SyncPolicyApi() *v1alpha1sync_policy.SyncPolicyApiService {
+	if v1alpha1SyncPolicyApi == nil {
+		err := InitHTTPClients()
+		if err != nil {
+			panic(err)
+		}
+	}
+	return v1alpha1SyncPolicyApi
 }
 
 // CreateModelClientWithCookie creates a new Model API client with a specific cookie
@@ -216,6 +279,29 @@ func CreateCurrentUserClientWithCookie(cookie string) *v1alpha1current_user.Curr
 	}
 
 	return v1alpha1current_user.NewAPIClient(cfg).CurrentUserApi
+}
+
+// CreateRobotClientWithCookie creates a new Robot API client with a specific cookie.
+func CreateRobotClientWithCookie(cookie string) *v1alpha1robot.RobotsApiService {
+	baseURL := GetBaseURL()
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // #nosec G402
+			Proxy:           http.ProxyFromEnvironment,
+		},
+	}
+
+	cfg := &v1alpha1robot.Configuration{
+		BasePath: baseURL,
+		DefaultHeader: map[string]string{
+			"Cookie":       cookie,
+			"Content-Type": "application/json",
+		},
+		HTTPClient: httpClient,
+	}
+
+	return v1alpha1robot.NewAPIClient(cfg).RobotsApi
 }
 
 // CreateUserClientWithCookie creates a new User API client with a specific cookie

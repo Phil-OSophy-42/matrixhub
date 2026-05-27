@@ -15,14 +15,54 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     'intro',
+    'overview/index',
+    'getting-started/index',
+    'installation/index',
+    'concepts/index',
+    'guides/index',
+    'integrations/index',
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Operations',
       items: [
-        'getting-started/quickstart',
-        'getting-started/examples',
+        {
+          type: 'category',
+          label: 'Model Repository',
+          items: [
+            'operations/model-repo/upload-download',
+            'operations/model-repo/project-setting',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Project Management',
+          items: [
+            'operations/project-management/create-delete',
+            'operations/project-management/members',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Profile',
+          items: [
+            'operations/profile/access-token',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Platform Settings',
+          items: [
+            'operations/platform-settings/user-management',
+            'operations/platform-settings/repository-management',
+            'operations/platform-settings/remote-sync',
+          ],
+        },
       ],
     },
+    'security/index',
+    'reference/index',
+    'troubleshooting/index',
+    'development/index',
   ],
 };
 

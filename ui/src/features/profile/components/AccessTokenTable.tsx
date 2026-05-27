@@ -1,24 +1,20 @@
 import {
-  ActionIcon,
+  Anchor,
   Box,
   Group,
-  Menu,
   Text,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import {
   CurrentUser, AccessTokenStatus, type AccessToken,
 } from '@matrixhub/api-ts/v1alpha1/current_user.pb'
-import {
-  IconDotsVertical,
-  IconTrash,
-} from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { profileKeys } from '@/features/profile/profile.query'
-import { DataTable } from '@/shared/components/DataTable'
+import { formatExpiredAt } from '@/features/profile/profile.utils.ts'
+import { DataTable, type DataTableRowActionsProps } from '@/shared/components/DataTable'
 import { ModalWrapper } from '@/shared/components/ModalWrapper'
 import { formatDateTime } from '@/shared/utils/date'
 
@@ -50,11 +46,9 @@ const StatusCell = ({ row }: { row: MRT_Row<AccessToken> }) => {
   )
 }
 
-type TableCellProps = Parameters<NonNullable<MRT_ColumnDef<AccessToken>['Cell']>>[0]
-
 const ActionCell = ({
   row, table,
-}: TableCellProps) => {
+}: DataTableRowActionsProps<AccessToken>) => {
   const { t } = useTranslation()
 
   const handleDeleteOpen = (
@@ -62,23 +56,13 @@ const ActionCell = ({
   )?.handleDeleteOpen
 
   return (
-    <Menu position="bottom-end">
-      <Menu.Target>
-        <ActionIcon variant="transparent" c="gray.6" size={20}>
-          <IconDotsVertical />
-        </ActionIcon>
-      </Menu.Target>
-      <Menu.Dropdown>
-        <Menu.Item
-          color="red"
-          leftSection={<IconTrash size={14} />}
-          onClick={() => handleDeleteOpen?.(row.original)}
-          styles={{ itemSection: { marginInlineEnd: 4 } }}
-        >
-          {t('profile.deleteToken')}
-        </Menu.Item>
-      </Menu.Dropdown>
-    </Menu>
+    <Anchor
+      component="button"
+      size="sm"
+      onClick={() => handleDeleteOpen?.(row.original)}
+    >
+      {t('profile.deleteToken')}
+    </Anchor>
   )
 }
 
@@ -113,14 +97,6 @@ export function AccessTokenTable({ tokens }: AccessTokenTableProps) {
     setDeletingToken(null)
   }
 
-  const formatExpiredAt = (expiredAt: string | undefined) => {
-    if (!expiredAt) {
-      return t('profile.tokenPermanent')
-    }
-
-    return formatDateTime(expiredAt)
-  }
-
   const columns: MRT_ColumnDef<AccessToken>[] = [
     {
       accessorKey: 'name',
@@ -134,18 +110,12 @@ export function AccessTokenTable({ tokens }: AccessTokenTableProps) {
     {
       accessorKey: 'expiredAt',
       header: t('profile.tokenExpiredAt'),
-      Cell: ({ row }) => formatExpiredAt(row.original.expiredAt),
+      Cell: ({ row }) => formatExpiredAt(row.original.expiredAt, t),
     },
     {
       accessorKey: 'createdAt',
       header: t('profile.tokenCreatedAt'),
       Cell: ({ row }) => formatDateTime(row.original.createdAt),
-    },
-    {
-      id: 'actions',
-      enableSorting: false,
-      header: '',
-      Cell: ActionCell,
     },
   ]
 
@@ -154,6 +124,8 @@ export function AccessTokenTable({ tokens }: AccessTokenTableProps) {
       <DataTable
         columns={columns}
         data={tokens}
+        enableRowActions
+        renderRowActions={ActionCell}
         tableOptions={{
           meta: { handleDeleteOpen },
         }}

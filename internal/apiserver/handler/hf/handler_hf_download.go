@@ -15,11 +15,13 @@
 package hf
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
+	"mime"
 	"net/http"
 	"os"
 	"strconv"
@@ -231,6 +233,9 @@ func (h *Handler) handleResolve(w http.ResponseWriter, r *http.Request) {
 			}()
 			ptr, err := lfs.DecodePointer(reader)
 			if err == nil && ptr != nil {
+				name := blob.Name()
+				w.Header().Set("Content-Disposition", mime.FormatMediaType("inline", map[string]string{"filename": name}))
+
 				// This is an LFS file, redirect to the LFS object
 				// Set HuggingFace-required headers before redirect
 				w.Header().Set("X-Repo-Commit", commitHash)
@@ -240,6 +245,13 @@ func (h *Handler) handleResolve(w http.ResponseWriter, r *http.Request) {
 					// Try tee cache fetch if configured
 					pf := h.mirror.Get(ptr.OID())
 					if pf != nil {
+						// Prevent concurrent downloads.
+						if r.Method == http.MethodHead {
+							w.Header().Set("Content-Length", strconv.FormatInt(pf.Total(), 10))
+							w.Header().Set("Last-Modified", pf.ModTime().UTC().Format(http.TimeFormat))
+							return
+						}
+
 						rs := pf.NewReadSeeker()
 						defer func() {
 							_ = rs.Close()
@@ -282,6 +294,9 @@ func (h *Handler) handleResolve(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	name := blob.Name()
+	w.Header().Set("Content-Disposition", mime.FormatMediaType("inline", map[string]string{"filename": name}))
+
 	// Set HuggingFace-required headers
 	// X-Repo-Commit is required by huggingface_hub to identify the commit
 	w.Header().Set("X-Repo-Commit", commitHash)
@@ -306,9 +321,22 @@ func (h *Handler) handleResolve(w http.ResponseWriter, r *http.Request) {
 		_ = reader.Close()
 	}()
 
-	_, err = io.Copy(w, reader)
-	if err != nil {
-		// Log but don't send error - we may have already written partial content
-		return
+	if r.Header.Get("Range") != "" {
+		// TODO: Unfortunately, go-git does not support ranged reading of blobs,
+		// so we have to read the entire content into memory before serving.
+		// This is not ideal for large files.
+		// We should consider implementing ranged reading in go-git in the future.
+		content, err := io.ReadAll(reader)
+		if err != nil {
+			responseJSON(w, fmt.Errorf("failed to read blob content for file %q in repository %q at revision %q: %v", path, ri.RepoName, rev, err), http.StatusInternalServerError)
+			return
+		}
+		http.ServeContent(w, r, blob.Name(), blob.ModTime(), bytes.NewReader(content))
+	} else {
+		_, err = io.Copy(w, reader)
+		if err != nil {
+			// Log but don't send error - we may have already written partial content
+			return
+		}
 	}
 }
