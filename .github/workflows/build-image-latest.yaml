@@ -8,7 +8,8 @@ on:
 permissions: write-all
 
 env:
-  HELM_VERSION: v3.13.0
+  # v3.18+ required for --force-conflicts flag (server-side apply support)
+  HELM_VERSION: v3.18.4
   CHART_NAME: matrixhub
 
 jobs:
