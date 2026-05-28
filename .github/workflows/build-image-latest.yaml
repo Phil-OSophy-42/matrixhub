@@ -93,10 +93,22 @@ jobs:
     runs-on: self-hosted
     if: success()
     steps:
+      # Remove any stale helm from /usr/local/bin so setup-helm's version wins in PATH
+      - name: Clean stale helm
+        run: |
+          sudo rm -f /usr/local/bin/helm /usr/bin/helm 2>/dev/null || \
+            rm -f /usr/local/bin/helm /usr/bin/helm 2>/dev/null || true
+          echo "Cleaned. which helm: $(which helm 2>&1 || echo none)"
+
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
           version: ${{ env.HELM_VERSION }}
+
+      - name: Verify Helm version
+        run: |
+          which helm
+          helm version --short
 
       - name: Login to GHCR (avoids broken anonymous auth flow)
         run: |
