@@ -8,7 +8,7 @@ on:
 permissions: write-all
 
 env:
-  # v3.18+ required for --force-conflicts flag (server-side apply support)
+  # Helm v3 uses client-side apply by default — no field manager conflicts
   HELM_VERSION: v3.18.4
   CHART_NAME: matrixhub
 
@@ -136,12 +136,12 @@ jobs:
             echo "Using values from: ${VALUES_FILE}"
           fi
 
-          # Image tag has 'v' prefix; chart version doesn't
+          # Image tag has 'v' prefix; chart version doesn't.
+          # Helm v3 uses client-side 3-way merge by default (no --force-conflicts needed)
           helm upgrade ${{ env.CHART_NAME }} /tmp/chart/${{ env.CHART_NAME }} \
             -n "${NAMESPACE}" \
             ${VALS_ARGS} \
             --set apiserver.image.tag="v${VERSION}" \
-            --force-conflicts \
             --wait --timeout 300s
 
           rm -rf /tmp/chart
