@@ -68,4 +68,4 @@ MatrixHub is easy to deploy using **Docker Compose** or **Kubernetes**. The enti
 
 👉 **Ready to get started?** Head over to the [Blog](/blog) to read the DeepSeek v4 walkthrough and usage examples.
 
-<!-- ci-parity smoke test: no content change -->
+{/* ci-parity smoke test: no content change */}
