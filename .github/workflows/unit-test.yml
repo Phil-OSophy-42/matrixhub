@@ -43,3 +43,5 @@ jobs:
 
       - name: Run unit tests
         run: make test.unit
+
+# ci-parity smoke test: no behavioural change
