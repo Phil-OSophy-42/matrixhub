@@ -625,3 +625,6 @@ func (server *APIServer) Shutdown() {
 	}
 
 }
+
+// ciParitySmokeTest marks a no-op change used to verify that release-* branch
+// PRs trigger the same gating CI as main. Safe to revert.
