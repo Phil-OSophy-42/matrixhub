@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.25.13
+ARG GO_VERSION=1.26.8
 ARG ALPINE_VERSION=3.23
 
 ARG BASE_IMAGE_PREFIX=docker.io
@@ -10,7 +10,7 @@ ARG NODE_IMAGE_VERSION=22
 
 ##########################################
 
-FROM --platform=$TARGETPLATFORM ${BASE_IMAGE_PREFIX}/library/golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
+FROM ${BASE_IMAGE_PREFIX}/library/golang:${GO_VERSION}-alpine${ALPINE_VERSION} AS builder
 
 WORKDIR /workspace
 
