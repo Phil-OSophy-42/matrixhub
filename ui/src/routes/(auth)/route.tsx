@@ -13,6 +13,7 @@ import { Login } from '@matrixhub/api-ts/v1alpha1/login.pb'
 import {
   IconChevronDown as ArrowDownIcon,
   IconCube as ModelIcon,
+  IconFileText as DocsIcon,
   IconLogout as LogOutIcon,
   IconSettings as SettingsIcon,
   IconUser as UserIcon,
@@ -88,6 +89,8 @@ function AppLogo() {
   )
 }
 
+const DOCS_URL = '/'
+
 function AppNavbar() {
   const { t } = useTranslation()
   const navRoutes = linkOptions([
@@ -105,6 +108,22 @@ function AppNavbar() {
     },
   ])
   const matchRoute = useMatchRoute()
+
+  const navLinkStyles = (isActive: boolean) => ({
+    root: {
+      width: 'auto',
+      height: '32px',
+      borderRadius: 'var(--mantine-radius-lg)',
+      fontWeight: '600',
+      color: isActive ? 'var(--nl-color)' : '#868E96',
+    },
+    section: {
+      marginInlineEnd: '8px',
+    },
+    label: {
+      whiteSpace: 'nowrap',
+    },
+  })
 
   return (
     <Group
@@ -142,24 +161,24 @@ function AppNavbar() {
               />
             )}
             active={isActive}
-            styles={{
-              root: {
-                width: 'auto',
-                height: '32px',
-                borderRadius: 'var(--mantine-radius-lg)',
-                fontWeight: '600',
-                color: isActive ? 'var(--nl-color)' : '#868E96',
-              },
-              section: {
-                marginInlineEnd: '8px',
-              },
-              label: {
-                whiteSpace: 'nowrap',
-              },
-            }}
+            styles={navLinkStyles(isActive)}
           />
         )
       })}
+
+      <NavLink
+        label={t('nav.docs')}
+        component="a"
+        href={t('common.docs', { doc: DOCS_URL })}
+        target="_blank"
+        rel="noopener noreferrer"
+        leftSection={(
+          <DocsIcon
+            size={rem(20)}
+          />
+        )}
+        styles={navLinkStyles(false)}
+      />
     </Group>
   )
 }
