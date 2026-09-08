@@ -8,7 +8,6 @@ import {
   Tooltip,
 } from '@mantine/core'
 import dayjs from 'dayjs'
-import { html as formatDiffHtml, parse } from 'diff2html'
 import {
   type MouseEvent,
   useEffect,
@@ -16,6 +15,11 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  MAX_FILES,
+  renderCommitDiff,
+  splitCommitDiff,
+} from '@/shared/components/commit-detail/commitDiff'
 import { CommitHashCard } from '@/shared/components/commit-detail/CommitHashCard'
 import { CommitMessageSection } from '@/shared/components/commit-detail/CommitMessageSection'
 import { DiffLimitAlert } from '@/shared/components/commit-detail/DiffLimitAlert'
@@ -30,19 +34,18 @@ interface CommitDetailProps {
   commit?: Commit
 }
 
-const MAX_FILES = 50
 const DIFF_PARSE_DELAY_MS = 30
 const RAW_DIFF_URL_REVOKE_DELAY_MS = 60_000
 
 interface DiffRenderState {
   html: string
-  hasLimit: boolean
+  hasTooManyFiles: boolean
   loading: boolean
 }
 
 const EMPTY_DIFF_RENDER_STATE: DiffRenderState = {
   html: '',
-  hasLimit: false,
+  hasTooManyFiles: false,
   loading: false,
 }
 
@@ -96,20 +99,15 @@ export function CommitDetail({ commit }: CommitDetailProps) {
         return
       }
 
-      const diffJson = parse(rawDiff)
-      const limitedDiffJson = diffJson.slice(0, MAX_FILES)
-      const nextDiffHtml = limitedDiffJson.length > 0
-        ? formatDiffHtml(limitedDiffJson, {
-            drawFileList: true,
-            matching: 'lines',
-            outputFormat: 'side-by-side',
-          })
-        : ''
+      const nextDiffRender = renderCommitDiff(
+        rawDiff,
+        t('shared.commitDetail.diffTooBig'),
+        t('shared.commitDetail.rawDiffLink'),
+      )
 
       if (!cancelled) {
         setDiffRender({
-          html: nextDiffHtml,
-          hasLimit: diffJson.length > MAX_FILES,
+          ...nextDiffRender,
           loading: false,
         })
       }
@@ -120,17 +118,39 @@ export function CommitDetail({ commit }: CommitDetailProps) {
       window.clearTimeout(loadingTimerId)
       window.clearTimeout(parseTimerId)
     }
-  }, [commit?.diff])
+  }, [commit?.diff, t])
 
-  const handleOpenRawDiff = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault()
-
+  const openRawDiff = (diff: string) => {
     const rawDiffUrl = URL.createObjectURL(
-      new Blob([commit?.diff ?? ''], { type: 'text/plain;charset=utf-8' }),
+      new Blob([diff], { type: 'text/plain;charset=utf-8' }),
     )
 
     window.open(rawDiffUrl, '_blank', 'noopener,noreferrer')
     setTimeout(() => URL.revokeObjectURL(rawDiffUrl), RAW_DIFF_URL_REVOKE_DELAY_MS)
+  }
+
+  const handleOpenRawDiff = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault()
+    openRawDiff(commit?.diff ?? '')
+  }
+
+  const handleDiffHtmlClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (!(event.target instanceof Element)) {
+      return
+    }
+
+    const link = event.target.closest<HTMLElement>('[data-commit-raw-diff-link]')
+
+    if (!link) {
+      return
+    }
+
+    event.preventDefault()
+
+    const fileIndex = Number(link.dataset.commitRawDiffLink)
+    const fileDiff = splitCommitDiff(commit?.diff ?? '')[fileIndex]
+
+    openRawDiff(fileDiff ?? commit?.diff ?? '')
   }
 
   return (
@@ -179,7 +199,7 @@ export function CommitDetail({ commit }: CommitDetailProps) {
               )
             : (
                 <>
-                  {diffRender.hasLimit
+                  {diffRender.hasTooManyFiles
                     ? (
                         <DiffLimitAlert
                           maxFiles={MAX_FILES}
@@ -193,6 +213,7 @@ export function CommitDetail({ commit }: CommitDetailProps) {
                       ? (
                           <Box
                             pos="relative"
+                            onClick={handleDiffHtmlClick}
                             // diff2html returns escaped markup intended for direct rendering.
                             // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
                             dangerouslySetInnerHTML={{ __html: diffRender.html }}
