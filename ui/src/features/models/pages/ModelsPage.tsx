@@ -27,30 +27,33 @@ export function ModelsPage() {
         wrap="nowrap"
       >
         <Flex
-          flex={24}
+          flex="0 0 24%"
           wrap="nowrap"
-          gap="xl"
+          pos="relative"
+          pe="xl"
           miw={0}
         >
-          {/* TODO: 1760px parent width cannot support maxWidth 400 */}
           <Box
             flex={1}
-            miw={260}
-            maw={400}
+            miw={0}
           >
             <ModelsFilterPanel />
           </Box>
 
           <Box
-            mt="sm"
+            pos="absolute"
+            top="var(--mantine-spacing-sm)"
+            bottom={0}
             style={{
+              insetInlineEnd: 0,
               borderInlineEnd: '1px solid var(--mantine-color-gray-3)',
             }}
           />
         </Flex>
 
         <Stack
-          flex={76}
+          flex={1}
+          miw={0}
           gap="lg"
         >
           {!repositoryIsEmpty && <HotModelList />}
